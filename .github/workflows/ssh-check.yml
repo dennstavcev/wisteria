@@ -1,0 +1,16 @@
+name: Проверка SSH-доступа к серверу
+
+on: workflow_dispatch
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Подключиться к серверу под deploy
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/ci_key
+          chmod 600 ~/.ssh/ci_key
+          printf '%s\n' '159.194.236.173 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFiEeX9AV6uQ3TK/VS508KFz+gU3sznGRsXwXa+aGSGF' > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          ssh -i ~/.ssh/ci_key deploy@159.194.236.173 'whoami; hostname; id'
