@@ -1,0 +1,449 @@
+<!doctype html>
+<!--
+  APPROVED PRODUCTION REFERENCE — 2026-09-03
+  Согласованный эталон поведения бабочек для боевой версии сайта «Вистерия».
+  При переносе сохранить: SVG-форму, непрерывную фазу взмаха, зависимость частоты
+  от скорости, Catmull–Rom-траектории, плавные ускорения, повороты и посадку.
+  Полная спецификация: ./APPROVED_BUTTERFLY_IMPLEMENTATION.md
+-->
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Вистерия — три бабочки в полёте</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: #2d2530;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(184, 137, 207, .2), transparent 28rem),
+        #fbfaf7;
+      font: 16px/1.5 system-ui, sans-serif;
+    }
+    main { width: min(680px, 92vw); text-align: center; }
+    h1 { margin: 0 0 .4rem; font: 500 clamp(24px, 4vw, 38px)/1.1 Georgia, serif; }
+    p { margin: 0; color: #776d79; }
+    .reference-stage {
+      position: relative;
+      height: 430px;
+      display: grid;
+      place-items: center;
+      perspective: 800px;
+      perspective-origin: 50% 45%;
+    }
+    .scale-wrap { transform: scale(2.35); transform-origin: 50% 50%; }
+
+    /* Геометрия и 3D-анимация повторяют CodePen JEFworks/XzKJmv. */
+    @keyframes left-wing-flap {
+      0%, 100% { transform: translate3d(0,0,0) scaleX(1) rotate3d(0,1,0,60deg); }
+      50% { transform: translate3d(0,0,0) scaleX(1) rotate3d(0,1,0,-70deg); }
+    }
+    @keyframes right-wing-flap {
+      0%, 100% { transform: translate3d(0,0,0) scaleX(-1) rotate3d(0,1,0,60deg); }
+      50% { transform: translate3d(0,0,0) scaleX(-1) rotate3d(0,1,0,-70deg); }
+    }
+    .butterfly_container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      transform-style: preserve-3d;
+    }
+    .butterfly_container var {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100px;
+      height: 100px;
+      margin: -50px 0 0 -50px;
+      transform-style: preserve-3d;
+    }
+    .butterfly_container var.rotate3d {
+      transform: rotate3d(1,.5,0,50deg);
+    }
+    figure.butterfly {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100px;
+      height: 100px;
+      margin: -50px 0 0 -50px;
+      transform-style: preserve-3d;
+      transform-origin: 50% 50%;
+    }
+    .wing {
+      position: absolute;
+      width: 50px;
+      height: 100px;
+      transform-style: preserve-3d;
+      transform-origin: 50px 50px;
+      will-change: transform;
+      backface-visibility: visible;
+    }
+    .wing.left { animation: left-wing-flap 1s ease-in-out infinite; }
+    .wing.right { animation: right-wing-flap 1s ease-in-out infinite; }
+    .wing use { display: block; transform-style: preserve-3d; }
+    .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .credit { font-size: 13px; }
+    .credit a { color: #8d4bad; }
+    .spec {
+      display: inline-flex;
+      gap: 8px;
+      margin-top: 4px;
+      padding: 7px 11px;
+      border: 1px solid #e3dce5;
+      border-radius: 999px;
+      color: #6d606f;
+      font: 12px/1 system-ui, sans-serif;
+      background: rgba(255,255,255,.72);
+    }
+
+    /* Стенд полёта поверх условной страницы магазина. */
+    body { display: block; overflow-x: hidden; background: #f9f7f2; }
+    .demo-page { position: relative; min-height: 100vh; overflow: hidden; }
+    .demo-header {
+      height: 74px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e8e2e8; background: rgba(255,255,255,.82); backdrop-filter: blur(12px);
+    }
+    .logo { font: 500 24px/1 Georgia, serif; letter-spacing: .12em; }
+    .demo-header nav { display: flex; gap: 28px; color: #716875; font-size: 13px; }
+    .demo-hero {
+      min-height: calc(100vh - 74px); padding: 8vh 6vw 5vh; display: grid;
+      grid-template-columns: minmax(280px, .85fr) minmax(420px, 1.15fr); align-items: center; gap: 5vw;
+      background: radial-gradient(circle at 72% 42%, #efe5f2 0, transparent 34%), #fcfaf6;
+    }
+    .copy-block { position: relative; z-index: 1; max-width: 580px; }
+    .eyebrow { color: #9556b4; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+    .copy-block h1 { margin: 14px 0 18px; text-align: left; font-size: clamp(42px, 5.2vw, 78px); }
+    .copy-block p { max-width: 520px; font-size: 17px; }
+    .cta {
+      display: inline-flex; margin-top: 28px; padding: 14px 24px; border-radius: 999px;
+      color: white; background: #9556b4; text-decoration: none; box-shadow: 0 12px 30px rgba(149,86,180,.24);
+    }
+    .bouquet {
+      position: relative; width: min(600px, 46vw); aspect-ratio: 1.15; justify-self: center;
+      filter: drop-shadow(0 30px 28px rgba(77,49,69,.12));
+    }
+    .flower { position: absolute; border-radius: 50%; box-shadow: inset -12px -10px 20px rgba(95,50,80,.12); }
+    .flower::before,.flower::after { content:""; position:absolute; inset:18%; border:2px solid rgba(255,255,255,.7); border-radius:50%; transform:rotate(45deg); }
+    .flower::after { inset:34%; background:rgba(255,255,255,.45); }
+    .f1{width:150px;height:150px;left:8%;top:28%;background:#e8bfd0}.f2{width:180px;height:180px;left:28%;top:8%;background:#f2dce4}
+    .f3{width:160px;height:160px;left:51%;top:25%;background:#d8bfdc}.f4{width:145px;height:145px;left:23%;top:48%;background:#fff}
+    .f5{width:135px;height:135px;left:58%;top:54%;background:#e7c5d5}.f6{width:115px;height:115px;left:72%;top:17%;background:#fff}
+    .stem { position:absolute; width:8px; height:220px; background:#789873; border-radius:9px; transform-origin:top; z-index:-1; }
+    .s1{left:39%;top:47%;transform:rotate(18deg)}.s2{left:55%;top:48%;transform:rotate(-13deg)}.s3{left:63%;top:48%;transform:rotate(8deg)}
+    .targets { position:absolute; left:6vw; right:6vw; bottom:4vh; display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    .target-card { min-height:92px; padding:18px 20px; border:1px solid #e7dfe8; border-radius:18px; background:rgba(255,255,255,.82); box-shadow:0 12px 34px rgba(54,34,50,.06); }
+    .target-card b { display:block; margin-bottom:5px; font:500 18px Georgia,serif; }
+    .target-card span { color:#8b808d; font-size:13px; }
+    #flight-layer { position:fixed; inset:0; z-index:20; pointer-events:none; perspective:900px; overflow:hidden; }
+    .flyer { position:absolute; left:0; top:0; width:100px; height:100px; transform-style:preserve-3d; will-change:transform; }
+    .flyer .butterfly_container { position:absolute; left:50%; top:50%; }
+    .flyer .wing.left,
+    .flyer .wing.right { animation: none; }
+    .flyer.flying { filter:drop-shadow(0 9px 7px rgba(55,21,64,.18)); }
+    .flyer.sitting { filter:drop-shadow(0 3px 3px rgba(55,21,64,.16)); }
+    .flight-ui {
+      position:fixed; right:18px; top:90px; z-index:30; width:230px; padding:14px 16px;
+      border:1px solid #e5dce7; border-radius:16px; background:rgba(255,255,255,.9); box-shadow:0 16px 42px rgba(48,29,45,.1);
+    }
+    .flight-ui strong { display:block; margin-bottom:4px; }
+    .flight-ui span { color:#806f82; font-size:12px; }
+    .flight-ui button { width:100%; margin-top:11px; padding:9px; border:0; border-radius:10px; color:#fff; background:#30272f; cursor:pointer; }
+    @media (max-width:800px){.demo-header nav{display:none}.demo-hero{grid-template-columns:1fr;padding-top:5vh}.bouquet{width:min(450px,82vw)}.targets{position:relative;left:auto;right:auto;bottom:auto;margin:0 6vw 24px;grid-template-columns:1fr}.flight-ui{top:auto;bottom:12px;right:12px;width:200px}.copy-block h1{text-align:center}.copy-block{text-align:center}.copy-block p{margin-inline:auto}}
+  </style>
+</head>
+<body>
+  <div class="demo-page">
+    <header class="demo-header"><div class="logo">ВИСТЕРИЯ</div><nav><span>Каталог</span><span>О нас</span><span>Доставка</span><span>Контакты</span></nav></header>
+    <section class="demo-hero">
+      <div class="copy-block">
+        <div class="eyebrow">Цветы · Букеты · Челябинск</div>
+        <h1>Радость в каждом лепестке</h1>
+        <p>Тест движения трёх согласованных SVG-бабочек: спокойные взмахи на цветах, быстрые серии при разгоне и редкие паузы во время планирования.</p>
+        <a class="cta landing-target" href="#">Связаться с нами</a>
+      </div>
+      <div class="bouquet" aria-label="Условный букет">
+        <i class="stem s1"></i><i class="stem s2"></i><i class="stem s3"></i>
+        <i class="flower f1 start-perch" data-x=".48" data-y=".3"></i><i class="flower f2 start-perch" data-x=".45" data-y=".34"></i>
+        <i class="flower f3 start-perch" data-x=".55" data-y=".3"></i><i class="flower f4"></i><i class="flower f5"></i><i class="flower f6"></i>
+      </div>
+      <div class="targets">
+        <div class="target-card landing-target"><b>«Дофаминовый»</b><span>Карточка букета</span></div>
+        <div class="target-card landing-target"><b>«Ромашковое поле»</b><span>Карточка букета</span></div>
+        <div class="target-card landing-target"><b>«Нежная история»</b><span>Карточка букета</span></div>
+      </div>
+    </section>
+  </div>
+  <div id="flight-layer"></div>
+  <aside class="flight-ui"><strong>Режим: <span id="flight-status">сидят на букете</span></strong><span>Медленно сидят → быстро взлетают → чередуют рывки и планирование → садятся.</span><button id="replay" type="button">Запустить заново</button></aside>
+  <template id="butterfly-template">
+    <div class="flyer sitting"><div class="butterfly_container"><var class="rotate3d"><figure class="butterfly"><svg class="wing left" viewBox="0 0 119.744 148.477"><use href="#shape-moth"></use></svg><svg class="wing right" viewBox="0 0 119.744 148.477"><use href="#shape-moth"></use></svg></figure></var></div></div>
+  </template>
+
+  <!-- Исходная форма крыла из референса. -->
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="shape-moth">
+        <path id="main" fill="#9556b4" d="M2.457 32.759c6.752 15.757 12.862 9.004 19.615 31.513 4.96 16.533 12.703 21.434 25.763 19.562-8.291 5.666-11.245 14.512-2.29 30.097 10.611 18.467 29.262 32.338 38.587 34.268s19.615-6.431 21.866-18.328c2.251-11.898 3.216-13.185 11.255-50.485V66.202v-8.039s-44.054-38.266-73.637-42.767C14.033 10.894-4.296 17.003 2.457 32.759z"/>
+        <g fill="#231f20" opacity=".25">
+          <path d="M117.253 66.202v-8.039S99.161 42.448 78.379 29.975c-.713.005-1.426.019-2.138.05-.845.037-1.785.136-2.336.776-1.082 1.255.241 3.104 1.484 4.2-4.664-1.523-9.341-3.008-14.03-4.454-1.262-.389-2.927-.643-3.646.465-.371.571-.322 1.319-.153 1.979.788 3.075 3.667 5.073 6.336 6.792-5.27-1.066-10.64-1.636-16.017-1.699 1.343 2.093 3.594 3.397 5.774 4.592 4.539 2.487 9.149 4.844 13.822 7.068-1.256.657-2.719.767-4.077 1.175-1.358.408-2.751 1.292-3.027 2.682-.142.715.038 1.456.289 2.141 1.25 3.41 4.231 5.957 7.526 7.483s6.92 2.161 10.498 2.781c-4.233.646-8.466 1.291-12.698 1.936-1.283.195-2.896.742-2.924 2.04-.013.59.345 1.123.742 1.56 3.252 3.581 8.933 3.011 13.693 2.153 6.792-1.224 13.584-2.448 20.377-3.672 4.1-.74 12.296-2.077 12.296-2.077z"/>
+          <path d="M112.228 67.787c-2.598-.367-5.221.297-7.739 1.031-7.427 2.165-14.659 4.994-21.583 8.444-1.494.744-3.216 1.968-2.936 3.613-1.226 3.942 15.291-3.223 22.495-6.209-7.234 3.414-14.403 7.708-18.865 14.346-.658.979-1.243 2.321-.531 3.262.523.691 1.508.802 2.375.781 6.148-.141 11.579-3.836 16.54-7.471-3.057 2.861-5.321 6.561-6.478 10.584-.418 1.455-.608 3.244.496 4.279 1.373 1.287 3.636.439 5.126-.711 2.406-1.856 4.297-4.375 5.408-7.204-.626 2.171-2.066 6.066-.944 6.688 1.771 1.537 3.293-1.535 4.463-2.938 4.365-5.225 6.148-12.076 7.745-18.695.418-1.735.831-3.565.336-5.28-.776-2.519-3.361-4.154-5.958-4.52z"/>
+        </g>
+        <g fill="#fff" opacity=".38">
+          <circle cx="22" cy="35" r="2.2"/><circle cx="34" cy="62" r="3"/><circle cx="53" cy="91" r="2.6"/>
+          <circle cx="69" cy="111" r="3.2"/><circle cx="83" cy="132" r="2"/><circle cx="76" cy="51" r="2.4"/>
+          <path d="M18 23c12 4 24 10 34 18-13-6-25-9-38-10zM43 72c14-2 30-6 46-12-12 9-28 16-43 20zM60 105c10-7 20-17 29-29-5 16-14 29-25 39z"/>
+        </g>
+        <path fill="#2a0e07" d="M119.744 44.906c-.432 0-.834.038-1.212.105C111.203 25.333 94.966 3.371 94.218 2.517c-.767-.877-1.425-3.234-2.521-2.302-1.096.932 1.37 2.138 1.37 2.138S92.929 3.372 94 3.503c0 0 5.938 7.827 10.25 14.964 6.474 10.715 11.965 22.628 13.779 26.68-3.596.985-4.503 5.059-3.919 8.202l-2.333-1.103C98.575 41.592 67.056 17.901 43.774 14.358c-6.339-.964-12.222-1.454-17.484-1.454-12.627 0-21.129 2.773-24.588 8.019-2.196 3.33-2.266 7.452-.209 12.25 3.013 7.032 5.939 9.746 8.77 12.371.7.648 1.392 1.292 2.08 1.995.094.257.285.479.555.6 2.008 2.167 3.983 5.009 6.016 10.144.708 1.792 1.423 3.858 2.15 6.283 4.352 14.506 10.892 20.695 21.869 20.696.481 0 .975-.017 1.477-.04-2.246 2.095-3.779 4.438-4.62 7.069-1.897 5.936-.312 13.184 4.842 22.155 1.815 3.158 3.898 6.22 6.15 9.136 10.459 13.531 24.608 23.863 33.134 25.627.958.198 1.948.299 2.94.299 9.246 0 18.105-8.548 20.169-19.461 1.029-5.438 1.804-8.716 3.087-14.144 1.128-4.771 2.685-11.36 5.195-22.707.665 10.199 2.016 24.19 4.432 24.19V44.906zm-5.269 14.504c-.161.835-.293 1.815-.348 2.904-22.391-2.471-29.897-5.986-34.008-7.915C66.1 47.824 55.373 42.562 50.079 39.689c22.385 3.279 44.007 9.904 64.396 19.721zM29.097 67.986c-2.48-1.302-4.213-4.392-2.97-6.876.626-1.252 1.781-2.007 3.108-2.504 13.216-.876 25.899-3.546 37.814-7.973 3.478 1.638 7.434 3.513 12.014 5.661 3.789 1.778 10.391 4.869 28.149 7.299-12.303.856-25.29 1.494-37.933 2.11-13.463.656-27.329 1.333-40.182 2.283zm5.012 9.428c-1.649-.75-3.422-1.818-3.808-3.588-.327-1.499.528-3.003 1.773-3.943 12.166-.841 24.986-1.47 37.472-2.078 12.259-.597 24.84-1.215 36.82-2.033C90.1 68.265 61.841 75.749 52.503 80.04c-6.31.927-13.338-.328-18.394-2.626zm11.588 17.79c.23-.316.478-.62.731-.918 15.64-8.008 31.847-14.988 47.292-20.625 3.257-1.366 6.775-2.831 10.436-3.905 2.466-.511 4.681-.948 6.563-1.307C99.836 74.044 89.121 80.017 78.74 85.826c-3.084 1.725-6.175 3.454-9.282 5.181-7.016 1.443-13.792 4.04-19.988 7.634-2.052.735-3.513.598-4.192-.286-.847-1.06-.247-2.236.419-3.151zm15.393 31.108c-1.117-.712-1.74-2.008-1.749-3.332-.019-2.774.722-5.521 2.035-7.957 1.456-1.159 2.952-2.295 4.48-3.448 4.648-3.504 12.458-9.182 17.93-7.739.247.066.321.106.333.111.026.057.043.349-.204.931-2.182 5.168-6.292 9.436-10.267 13.564-3.02 3.137-8.54 10.43-12.558 7.87zm21.903 11.667c-2.143 2.096-4.031 2.861-5.335 1.975-2.012-.996-1.775-3.246-.991-5.137.561-.601 1.123-1.197 1.681-1.788 4.497-4.767 9.148-9.694 11.826-15.848 2.723-6.252 4.208-14.206 10.827-30.103l12.134-16.143c-7.83 23.144-16.199 46.719-30.142 67.044z"/>
+      </g>
+    </defs>
+  </svg>
+  <script>
+    (() => {
+      const layer = document.querySelector('#flight-layer');
+      const template = document.querySelector('#butterfly-template');
+      const status = document.querySelector('#flight-status');
+      const starts = [...document.querySelectorAll('.start-perch')];
+      const targets = [...document.querySelectorAll('.landing-target')].slice(0, 3);
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const smoothstep = t => t * t * (3 - 2 * t);
+      const routePatterns = [
+        [[.60,.52],[.33,.22],[.10,.43],[.30,.70],[.69,.24],[.90,.46],[.66,.62]],
+        [[.48,.48],[.74,.18],[.91,.38],[.72,.70],[.38,.57],[.16,.28],[.40,.22]],
+        [[.57,.55],[.82,.32],[.68,.16],[.37,.27],[.13,.60],[.44,.73],[.83,.57]]
+      ];
+      let raf = 0;
+      let runToken = 0;
+
+      function catmullRom(points, detail = 42) {
+        const samples = [];
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[Math.max(0, i - 1)];
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const p3 = points[Math.min(points.length - 1, i + 2)];
+          for (let j = 0; j < detail; j++) {
+            const t = j / detail, t2 = t * t, t3 = t2 * t;
+            samples.push({
+              x: .5 * ((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+              y: .5 * ((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+            });
+          }
+        }
+        samples.push(points.at(-1));
+        let length = 0;
+        samples[0].distance = 0;
+        for (let i = 1; i < samples.length; i++) {
+          length += Math.hypot(samples[i].x - samples[i-1].x, samples[i].y - samples[i-1].y);
+          samples[i].distance = length;
+        }
+        return { samples, length };
+      }
+
+      function sampleAt(route, distance) {
+        const a = route.samples;
+        distance = clamp(distance, 0, route.length);
+        let lo = 0, hi = a.length - 1;
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1;
+          if (a[mid].distance < distance) lo = mid + 1; else hi = mid;
+        }
+        const i = Math.max(1, lo), p0 = a[i-1], p1 = a[i];
+        const span = Math.max(.001, p1.distance - p0.distance);
+        const t = (distance - p0.distance) / span;
+        return { x: lerp(p0.x,p1.x,t), y: lerp(p0.y,p1.y,t), index: i };
+      }
+
+      class Flyer {
+        constructor(index) {
+          this.index = index;
+          this.seed = 1.7 + index * 2.31;
+          this.el = template.content.firstElementChild.cloneNode(true);
+          this.leftWing = this.el.querySelector('.wing.left');
+          this.rightWing = this.el.querySelector('.wing.right');
+          this.el.style.filter = `hue-rotate(${index * 13 - 8}deg) saturate(${1 + index * .12}) drop-shadow(0 7px 6px rgba(55,21,64,.16))`;
+          layer.append(this.el);
+          this.phase = index * .23;
+          this.flapHz = .58 + index * .06;
+          this.targetFlapHz = this.flapHz;
+          this.speed = 0;
+          this.acceleration = 0;
+          this.distance = 0;
+          this.angle = -.25 + index * .18;
+          this.previousTangent = this.angle;
+          this.mode = 'sitting';
+        }
+
+        pointFor(el, ox = .5, oy = .5) {
+          const r = el.getBoundingClientRect();
+          return {
+            x: clamp(r.left + r.width * ox, 48, innerWidth - 48),
+            y: clamp(r.top + r.height * oy, 90, innerHeight - 48)
+          };
+        }
+
+        sitAtStart() {
+          const perch = starts[this.index];
+          const p = this.pointFor(perch, Number(perch.dataset.x), Number(perch.dataset.y));
+          this.x = p.x; this.y = p.y;
+          this.mode = 'sitting';
+          this.el.className = 'flyer sitting';
+          this.speed = 0; this.acceleration = 0; this.distance = 0;
+          this.targetFlapHz = .48 + this.index * .055;
+          this.angle = (-18 + this.index * 15) * Math.PI / 180;
+          this.paint(0);
+        }
+
+        buildRoute() {
+          const start = { x: this.x, y: this.y };
+          const end = this.pointFor(targets[this.index], .72, .18);
+          const points = [start];
+          for (const [nx, ny] of routePatterns[this.index]) {
+            points.push({ x: nx * innerWidth, y: clamp(ny * innerHeight, 92, innerHeight - 72) });
+          }
+          points.push(end);
+          this.route = catmullRom(points);
+        }
+
+        takeOff() {
+          this.buildRoute();
+          this.mode = 'flying';
+          this.el.className = 'flyer flying';
+          this.speed = 24;
+          this.acceleration = 0;
+          this.distance = 0;
+        }
+
+        finishLanding() {
+          this.mode = 'landed';
+          this.el.className = 'flyer sitting';
+          this.speed = 0;
+          this.acceleration = 0;
+          this.targetFlapHz = .46 + this.index * .05;
+          const end = this.route.samples.at(-1);
+          this.x = end.x; this.y = end.y;
+          this.angle = (-12 + this.index * 9) * Math.PI / 180;
+        }
+
+        updateFlight(dt, now) {
+          if (this.mode !== 'flying') return;
+          const progress = this.distance / this.route.length;
+          const here = sampleAt(this.route, this.distance);
+          const ahead = sampleAt(this.route, this.distance + 22);
+          const behind = sampleAt(this.route, this.distance - 18);
+          const tangent = Math.atan2(ahead.y - behind.y, ahead.x - behind.x);
+          const aheadFar = sampleAt(this.route, this.distance + 55);
+          const turnAhead = Math.abs(Math.atan2(Math.sin(Math.atan2(aheadFar.y-ahead.y,aheadFar.x-ahead.x)-tangent), Math.cos(Math.atan2(aheadFar.y-ahead.y,aheadFar.x-ahead.x)-tangent)));
+
+          const personality = [1, .92, .82][this.index];
+          const breathing = .88 + .12 * Math.sin(now * .00072 + this.seed);
+          const curveSlowdown = clamp(1 - turnAhead * .78, .56, 1);
+          const launchEase = clamp(this.distance / 145, .28, 1);
+          const landingEase = clamp((this.route.length - this.distance) / 210, .16, 1);
+          const desiredSpeed = 154 * personality * breathing * curveSlowdown * Math.min(launchEase, landingEase);
+          const desiredAcceleration = clamp((desiredSpeed - this.speed) * 2.25, -92, 74);
+          this.acceleration += (desiredAcceleration - this.acceleration) * (1 - Math.exp(-dt / .34));
+          this.speed = Math.max(18, this.speed + this.acceleration * dt);
+          this.distance = Math.min(this.route.length, this.distance + this.speed * dt);
+
+          const p = sampleAt(this.route, this.distance);
+          const pAhead = sampleAt(this.route, this.distance + 18);
+          const dx = pAhead.x - p.x, dy = pAhead.y - p.y;
+          const desiredAngle = Math.atan2(dy, dx) + Math.PI / 2;
+          const angleDelta = Math.atan2(Math.sin(desiredAngle - this.angle), Math.cos(desiredAngle - this.angle));
+          this.angle += angleDelta * (1 - Math.exp(-dt / .16));
+          const normalX = -dy / Math.max(1, Math.hypot(dx,dy));
+          const normalY = dx / Math.max(1, Math.hypot(dx,dy));
+          const noiseFade = Math.sin(Math.PI * clamp(progress, 0, 1));
+          const drift = (Math.sin(now * .00125 + this.seed) * 7 + Math.sin(now * .0021 + this.seed * 1.8) * 2.5) * noiseFade;
+          this.x = p.x + normalX * drift;
+          this.y = p.y + normalY * drift;
+
+          const glide = .5 + .5 * Math.sin(now * .00105 + this.seed * 2.4);
+          this.targetFlapHz = 1.45 + (this.speed / 154) * 1.35 + glide * .22;
+          if (landingEase < .5) this.targetFlapHz *= .66 + landingEase * .68;
+          this.previousTangent += (tangent - this.previousTangent) * (1 - Math.exp(-dt / .22));
+          this.bank = clamp(angleDelta * 34, -19, 19);
+          if (this.distance >= this.route.length - .5) this.finishLanding();
+        }
+
+        updateWings(dt, now) {
+          if (this.mode === 'sitting' || this.mode === 'landed') {
+            this.targetFlapHz = .46 + this.index * .05 + .07 * Math.sin(now * .0007 + this.seed);
+          }
+          this.flapHz += (this.targetFlapHz - this.flapHz) * (1 - Math.exp(-dt / .42));
+          this.phase = (this.phase + this.flapHz * dt) % 1;
+          let angle;
+          if (this.phase < .32) {
+            const t = smoothstep(this.phase / .32);
+            angle = lerp(58, -62, t);
+          } else if (this.phase < .88) {
+            const t = smoothstep((this.phase - .32) / .56);
+            angle = lerp(-62, 56, t);
+          } else {
+            const t = (this.phase - .88) / .12;
+            angle = 56 + Math.sin(t * Math.PI) * 3;
+          }
+          const amplitude = this.mode === 'flying' ? 1 : .76;
+          const adjusted = 10 + (angle - 10) * amplitude;
+          this.leftWing.style.transform = `translate3d(0,0,0) scaleX(1) rotate3d(0,1,0,${adjusted}deg)`;
+          this.rightWing.style.transform = `translate3d(0,0,0) scaleX(-1) rotate3d(0,1,0,${adjusted}deg)`;
+        }
+
+        paint(dt) {
+          const scale = .58 + this.index * .04;
+          const bank = this.mode === 'flying' ? (this.bank || 0) : 0;
+          this.el.style.transform = `translate3d(${this.x-50}px,${this.y-50}px,0) rotateZ(${this.angle}rad) rotateY(${bank}deg) scale(${scale})`;
+        }
+
+        update(dt, now) {
+          this.updateFlight(dt, now);
+          this.updateWings(dt, now);
+          this.paint(dt);
+        }
+      }
+
+      const flyers = [0, 1, 2].map(i => new Flyer(i));
+
+      function reset() {
+        runToken++;
+        cancelAnimationFrame(raf);
+        flyers.forEach(f => f.sitAtStart());
+        status.textContent = 'сидят на букете — медленные взмахи';
+        const token = runToken;
+        if (!reduceMotion) flyers.forEach((f, i) => setTimeout(() => {
+          if (token !== runToken) return;
+          f.takeOff();
+        }, 3000 + i * 420));
+        let previous = performance.now();
+        const tick = now => {
+          if (token !== runToken) return;
+          const dt = Math.min(.033, Math.max(.001, (now - previous) / 1000));
+          previous = now;
+          flyers.forEach(f => f.update(dt, now));
+          const flying = flyers.filter(f => f.mode === 'flying').length;
+          const landed = flyers.filter(f => f.mode === 'landed').length;
+          if (flying) status.textContent = 'летят — плавные дуги, рывки и планирование';
+          else if (landed === flyers.length) status.textContent = 'сели — снова медленные взмахи';
+          else status.textContent = 'сидят на букете — медленные взмахи';
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      }
+
+      let resizeTimer;
+      addEventListener('load', reset);
+      addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(reset, 180); });
+      document.querySelector('#replay').addEventListener('click', reset);
+    })();
+  </script>
+</body>
+</html>

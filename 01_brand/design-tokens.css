@@ -1,0 +1,196 @@
+/* ============================================================
+   ТОКЕНЫ ДИЗАЙН-СИСТЕМЫ «ВИСТЕРИЯ»
+
+   Выгружено из Claude Design 03.09.2026.
+   Источник: https://claude.ai/design/p/e2a6dc51-eefc-4f70-884d-6c0e5455de59
+
+   ЧТО ЗДЕСЬ ОТ ИСТОЧНИКА, А ЧТО ПЕРЕСЧИТАНО
+   ------------------------------------------------------------
+   colors / spacing / radius / shadows / motion — дословно из
+   источника, значения не менялись.
+
+   typography — ЗАМЕНЕНА 03.09.2026. В источнике там оставались
+   Playfair Display и Montserrat (Google Fonts) — отменённая
+   временная замена. Здесь подставлены подлинные фирменные
+   шрифты, а размерная шкала пересчитана по реальным метрикам
+   гарнитур (замер таблиц OS/2 всех 14 файлов). Обоснование
+   каждого числа — 01_brand/DESIGN.md §4.
+
+   ⚠️ Источник в Claude Design в части шрифтов ещё НЕ исправлен.
+   Этот файл в части типографики опережает источник.
+   ============================================================ */
+
+
+/* ── ШРИФТЫ ──────────────────────────────────────────────────
+   Файлы: 01_brand/fonts/ (14 файлов, ~964 КБ в TTF).
+   Лицензии: Bergamasco — Commercial Use Allowed, Caviar Dreams
+   — Freeware. Кириллица полная у обоих.
+
+   TODO при сборке: сконвертировать в woff2 (даёт примерно
+   -60% веса) и заменить format('truetype') на format('woff2').
+   Пути ниже указывают на файлы, которые реально существуют
+   сейчас, поэтому ничего не отваливается до конвертации.
+   ------------------------------------------------------------ */
+
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-Thin.ttf') format('truetype');font-weight:100;font-style:normal;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-ThinItalic.ttf') format('truetype');font-weight:100;font-style:italic;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-Light.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-LightItalic.ttf') format('truetype');font-weight:300;font-style:italic;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-RegularItalic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-Semibold.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-SemiboldItalic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Bergamasco';src:url('./fonts/Bergamasco-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
+
+@font-face{font-family:'Caviar Dreams';src:url('./fonts/CaviarDreams-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Caviar Dreams';src:url('./fonts/CaviarDreams-Italic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Caviar Dreams';src:url('./fonts/CaviarDreams-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Caviar Dreams';src:url('./fonts/CaviarDreams-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
+
+
+/* tokens/colors.css — дословно из источника */
+:root{
+--vs-white:#FFFFFF;
+--vs-black:#000000;
+--vs-green-900:#22431a;
+--vs-green-700:#366729;
+--vs-green-500:#4f8a3d;
+--vs-green-200:#c9dcc1;
+--vs-green-100:#eef4ea;
+--vs-purple-900:#5c3475;
+--vs-purple-700:#9556B4;
+--vs-purple-500:#ac78c6;
+--vs-purple-200:#e6d7ef;
+--vs-purple-100:#f4ecf8;
+--vs-cream:#fbf8f3;
+--vs-ink:#1c1a17;
+--vs-stone-600:#6b655c;
+--vs-stone-300:#d9d3c8;
+
+--color-bg:var(--vs-cream);
+--color-surface:var(--vs-white);
+--color-surface-sunken:var(--vs-green-100);
+--color-text:var(--vs-ink);
+--color-text-muted:var(--vs-stone-600);
+--color-text-on-dark:var(--vs-white);
+--color-border:var(--vs-stone-300);
+--color-border-strong:var(--vs-ink);
+
+--color-primary:var(--vs-purple-700);
+--color-primary-hover:var(--vs-purple-900);
+--color-primary-tint:var(--vs-purple-100);
+--color-secondary:var(--vs-green-700);
+--color-secondary-hover:var(--vs-green-900);
+--color-secondary-tint:var(--vs-green-100);
+
+--color-link:var(--vs-purple-700);
+--color-link-hover:var(--vs-purple-900);
+
+--color-success:var(--vs-green-700);
+--color-danger:#b3452f;
+--color-danger-tint:#f8e8e3;
+}
+
+
+/* tokens/typography.css — ПЕРЕСЧИТАНО 03.09.2026 под подлинные шрифты */
+:root{
+--font-display:'Bergamasco',Georgia,'Times New Roman',serif;
+--font-body:'Caviar Dreams','Helvetica Neue',Arial,sans-serif;
+
+/* Замеренные метрики (доля от em):
+   Bergamasco    — x-height 0.498,  cap-height 0.700
+   Caviar Dreams — x-height 0.4795, cap-height 0.7813
+   Playfair (был)— x-height 0.514,  cap-height 0.708
+   Montserrat(был)— x-height 0.525, cap-height 0.700               */
+
+/* ЗАГОЛОВКИ — Bergamasco. Не изменены: расхождение с Playfair
+   всего 1.1% по прописным и 3.2% по строчным (в среднем 2.2%),
+   это ниже порога различимости. Правка была бы ложной точностью. */
+--text-display-xl:clamp(2.75rem,4vw+1rem,4.5rem);
+--text-display-lg:clamp(2.25rem,2.4vw+1.4rem,3.25rem);
+--text-display-md:clamp(1.75rem,1.4vw+1.2rem,2.25rem);
+--text-display-sm:1.5rem;
+
+/* ТЕКСТ — Caviar Dreams. У неё x-height НИЖЕ, чем у Montserrat,
+   на 8.7%, поэтому при том же кегле текст читался бы мельче.
+   Компенсация ×1.0949, округлено до чистых значений.            */
+--text-body-lg:1.25rem;      /* 20px, было 18px — x-height 9.45 → 9.59px */
+--text-body-md:1.125rem;     /* 18px, было 16px — x-height 8.40 → 8.63px */
+--text-body-sm:0.9375rem;    /* 15px, было 14px — x-height 7.35 → 7.19px */
+
+/* КАПС-ЛЕЙБЛ — считается по ПРОПИСНЫМ, а не по строчным, потому
+   что применяется только к КАПСу (см. --tracking-label ниже).
+   cap-height у Caviar Dreams на 11.6% ВЫШЕ, чем у Montserrat,
+   поэтому единственный кегль в шкале, который идёт ВНИЗ.
+   Компенсация ×0.8959.                                          */
+--text-label:0.6875rem;      /* 11px, было 12px — cap-height 8.40 → 8.59px */
+
+/* Интерлиньяж. leading-tight поднят с 1.1: бокс Bergamasco
+   Semibold (заголовки h1–h4, вес 600) равен 1.1025em, то есть
+   1.1 обрезал бы выносные — для русского это Ё и Й в многострочных
+   заголовках. 1.15 даёт запас.                                   */
+--leading-tight:1.15;        /* было 1.1 */
+--leading-snug:1.3;
+--leading-normal:1.6;        /* бокс Caviar Dreams 1.1621em — запас есть */
+
+--tracking-label:0.14em;
+--tracking-wide:0.04em;
+--tracking-normal:0;
+}
+
+
+/* tokens/spacing.css — дословно из источника */
+:root{
+--space-1:4px;
+--space-2:8px;
+--space-3:12px;
+--space-4:16px;
+--space-5:24px;
+--space-6:32px;
+--space-7:48px;
+--space-8:64px;
+--space-9:96px;
+--space-10:128px;
+
+--radius-sm:4px;
+--radius-md:10px;
+--radius-lg:20px;
+--radius-pill:999px;
+
+--shadow-sm:0 1px 2px rgba(28,26,23,.06);
+--shadow-card:0 1px 3px rgba(28,26,23,.05),0 12px 28px rgba(54,103,41,.10);
+--shadow-elevated:0 24px 60px rgba(28,26,23,.16);
+
+--border-hairline:1px solid var(--color-border);
+--container-max:1200px;
+--ease-standard:cubic-bezier(.4,0,.2,1);
+--duration-fast:150ms;
+--duration-base:240ms;
+}
+
+
+/* tokens/base.css — дословно из источника, кроме font-size-adjust */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--color-bg);
+  color:var(--color-text);
+  font-family:var(--font-body);
+  font-size:var(--text-body-md);
+  line-height:var(--leading-normal);
+  /* Добавлено 03.09.2026: удерживает x-height запасных гарнитур
+     равным Caviar Dreams, пока шрифт грузится и если он не
+     загрузился. Без этого подмена на Arial (x-height 0.519)
+     заметно скачет.                                             */
+  font-size-adjust:0.4795;
+}
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  margin:0;
+  line-height:var(--leading-tight);
+  font-weight:600;
+  font-size-adjust:0.498; /* x-height Bergamasco */
+}
+a{color:var(--color-link);text-decoration:none}
+a:hover{color:var(--color-link-hover);text-decoration:underline}
