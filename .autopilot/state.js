@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-04T12:02:57+03:00",
+  "updatedAt": "2026-09-04T16:54:36+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -49,13 +49,13 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-03T21:25:22+03:00",
-      "note": "3 из 7 тасков сдано"
+      "note": "6 из 7 тасков сдано"
     },
     {
       "id": "review",
       "status": "active",
       "startedAt": "2026-09-04T08:08:37+03:00",
-      "note": "01 и 03 на ревью"
+      "note": "проверено 6 из 7"
     },
     {
       "id": "final",
@@ -64,8 +64,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 14,
-    "done": 6,
-    "inTicket": 8,
+    "done": 10,
+    "inTicket": 4,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -198,7 +198,7 @@ window.STATE =
         "05_website-plan/06_admin-dashboard.md",
         "05_website-plan/02_moysklad-integration.md"
       ],
-      "status": "review",
+      "status": "done",
       "retries": 0,
       "repairs": 0,
       "handoffs": 1,
@@ -206,7 +206,14 @@ window.STATE =
       "tests": {
         "passed": 3,
         "failed": 0
-      }
+      },
+      "finishedAt": "2026-09-04T12:08:29+03:00",
+      "commit": "0652f3e",
+      "files": [
+        "05_website-plan/03_database-schema.md",
+        "05_website-plan/06_admin-dashboard.md",
+        "05_website-plan/02_moysklad-integration.md"
+      ]
     },
     {
       "id": "05",
@@ -227,14 +234,21 @@ window.STATE =
         "05_website-plan/10_pre-development-checklist.md",
         "05_website-plan/00_overview.md"
       ],
-      "status": "review",
+      "status": "done",
       "retries": 1,
       "repairs": 0,
       "handoffs": 0,
       "tests": {
         "passed": 10,
         "failed": 0
-      }
+      },
+      "finishedAt": "2026-09-04T12:07:17+03:00",
+      "commit": "4437133",
+      "files": [
+        "05_website-plan/07_roadmap-phases.md",
+        "05_website-plan/10_pre-development-checklist.md",
+        "05_website-plan/00_overview.md"
+      ]
     },
     {
       "id": "06",
@@ -257,7 +271,7 @@ window.STATE =
         "05_website-plan/14_security-and-process-decisions.md",
         "AGENT_SERVER_SETUP_TASK.md"
       ],
-      "status": "review",
+      "status": "done",
       "retries": 1,
       "repairs": 0,
       "handoffs": 0,
@@ -265,7 +279,18 @@ window.STATE =
       "tests": {
         "passed": 9,
         "failed": 0
-      }
+      },
+      "finishedAt": "2026-09-04T12:08:29+03:00",
+      "commit": "6a82d48",
+      "files": [
+        "05_website-plan/16_ui-design-task.md",
+        "05_website-plan/13_server-capacity-and-services-plan.md",
+        "05_website-plan/12_design-system-base.md",
+        "05_website-plan/09_workflow-tooling.md",
+        "05_website-plan/05_personal-cabinet.md",
+        "05_website-plan/14_security-and-process-decisions.md",
+        "AGENT_SERVER_SETUP_TASK.md"
+      ]
     },
     {
       "id": "07",
@@ -290,10 +315,17 @@ window.STATE =
         "05_website-plan/20_start-here.md",
         "00_README.md"
       ],
-      "status": "pending",
+      "status": "review",
       "retries": 0,
-      "repairs": 0,
-      "handoffs": 0
+      "repairs": 1,
+      "handoffs": 0,
+      "startedAt": "2026-09-04T12:08:29+03:00",
+      "repairFindings": [
+        "20_start-here.md заканчивался утёкшей служебной разметкой </content> и </invoke>",
+        "§2 продублировал привязку «пункт → этап» из 07_roadmap; срок по ротации токена разошёлся в трёх местах",
+        "по пунктам заказчика не сказано, что блокируется, пока пункт не сделан",
+        "дерево в 00_README.md — закрывается финальной правкой"
+      ]
     }
   ],
   "singlePass": null,
@@ -303,7 +335,10 @@ window.STATE =
     "assumptions": [],
     "emptyEnv": []
   },
-  "additions": [],
+  "additions": [
+    "Роль `florist` отдельно от `manager` — чтобы тот, кто грузит фото, не видел выручку — ради R05",
+    "Еженедельный дайджест управленки в Telegram — ради R06, описан как вторая волна"
+  ],
   "coverage": {
     "found": 8,
     "fixed": 8,
@@ -328,11 +363,74 @@ window.STATE =
     "07_roadmap-phases.md блок зависимостей называет источником модерации Этап 4, тогда как сам ставит её в Этап 2",
     "07_roadmap-phases.md п.15 §8.1 привязан к Этапу 5 целиком, но порог устаревания данных нужен уже Этапу 4",
     "10_pre-development-checklist.md шапка столбца «Статус на 03.09.2026» стоит над строками от 04.09.2026",
-    "07_roadmap-phases.md шапка обещает оценки в неделях, которых в пересобранной карте нет (унаследовано)"
+    "07_roadmap-phases.md шапка обещает оценки в неделях, которых в пересобранной карте нет (унаследовано)",
+    "03_database-schema.md §9 — правило видимости витрины введено конъюнкцией с products.is_active, тогда как 18 §1.2 говорит, что поле сайта его побеждает",
+    "03_database-schema.md §9 — псевдокод выборки не показывает ни join изображений, ни предикат публикации: иллюстрирует не то место, где разработчик ошибётся",
+    "06_admin-dashboard.md §1.2 и §9 — механика отметки актуальности изложена своими словами, хотя ею владеет 19",
+    "16_ui-design-task.md — признак 3 отменён для управленки, признак 1 приглушён для деликатного шаблона: исключений спецификация не давала, они поданы как её прочтение",
+    "13_server-capacity §3.1 — «реально доступно ~3.7-3.8 ГБ» расходится с §1 того же файла, где потеря заявлена в 100-250 МБ",
+    "13_server-capacity §8 — «один шаг тарифа» до 6-8 ГБ: утверждение о тарифной сетке Beget, ничем в проекте не подтверждённое",
+    "13_server-capacity §6, §9, §10 — часть ссылок на runbook заменена без зачёркивания, тогда как в §0.1, §1, §5 зачёркивание применено: приём не единый",
+    "spec «Границы и швы» не назвала 00_README.md владельцем ничего, хотя interfaces.md даёт его в паре с 20_start-here.md — расхождение в самой спецификации"
   ],
   "reviewers": {
     "manifestSpec": null,
     "craft": null
   },
-  "blind": null
+  "blind": {
+    "verdict": "все требования брифа и все семь Дополнений — реализовано",
+    "drift": [],
+    "links": {
+      "files": 1018,
+      "sections": 544,
+      "brokenSections": 0,
+      "brokenFileTargets": 2
+    },
+    "extra": [
+      "20_start-here.md обрывался служебной разметкой — в починке",
+      "03_database-schema.md не знает про TOTP и allowlist, хотя 14_... §2 делает второй фактор обязательным — в починке",
+      "оценка §4 аудита устарела в момент сдачи: пять файлов числятся «Не готово» после того, как их починили — в починке"
+    ],
+    "brokenFiles": [
+      "SERVER_SETUP_RUNBOOK.md (12 упоминаний)",
+      "вистерия фирменный стиль.zip (10 упоминаний)"
+    ]
+  },
+  "concernsTriage": {
+    "fixNow": [
+      1,
+      15,
+      16,
+      17,
+      18,
+      20,
+      22,
+      24,
+      25
+    ],
+    "report": [
+      2,
+      3,
+      11,
+      12,
+      13,
+      14,
+      19,
+      21,
+      23,
+      26,
+      27
+    ],
+    "drop": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "dropReason": "закрыты дозапросами по таскам 01, 02 и 03 по ходу сборки",
+    "promoted": "два повторяющихся шаблона подняты в fixNow по правилу «три таска и больше»: документ излагает своими словами чужую тему вместо ссылки; сроки и привязки дублируются и расходятся"
+  }
 }
