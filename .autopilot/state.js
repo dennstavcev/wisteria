@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-04T08:11:17+03:00",
+  "updatedAt": "2026-09-04T08:19:16+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -49,7 +49,7 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-03T21:25:22+03:00",
-      "note": "1 из 7 тасков сдан, 3 написаны"
+      "note": "2 из 7 тасков сдано"
     },
     {
       "id": "review",
@@ -64,8 +64,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 14,
-    "done": 3,
-    "inTicket": 11,
+    "done": 4,
+    "inTicket": 10,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -149,7 +149,7 @@ window.STATE =
       "zone": [
         "05_website-plan/19_management-reporting.md"
       ],
-      "status": "repair",
+      "status": "done",
       "retries": 0,
       "repairs": 1,
       "handoffs": 0,
@@ -160,7 +160,16 @@ window.STATE =
         "§9 приписывает себе метку A01, принадлежащую 18",
         "§12 сводка значений по умолчанию неполна",
         "§7 дублирует число из 02_moysklad-integration.md; §10 классифицирует чужие экраны"
-      ]
+      ],
+      "finishedAt": "2026-09-04T08:19:16+03:00",
+      "commit": "f0c1eec",
+      "files": [
+        "05_website-plan/19_management-reporting.md"
+      ],
+      "tests": {
+        "passed": 11,
+        "failed": 0
+      }
     },
     {
       "id": "04",
@@ -180,10 +189,11 @@ window.STATE =
         "05_website-plan/06_admin-dashboard.md",
         "05_website-plan/02_moysklad-integration.md"
       ],
-      "status": "pending",
+      "status": "in-progress",
       "retries": 0,
       "repairs": 0,
-      "handoffs": 0
+      "handoffs": 0,
+      "startedAt": "2026-09-04T08:19:16+03:00"
     },
     {
       "id": "05",
@@ -230,11 +240,15 @@ window.STATE =
         "05_website-plan/14_security-and-process-decisions.md",
         "AGENT_SERVER_SETUP_TASK.md"
       ],
-      "status": "in-progress",
+      "status": "review",
       "retries": 1,
       "repairs": 0,
       "handoffs": 0,
-      "startedAt": "2026-09-04T08:08:37+03:00"
+      "startedAt": "2026-09-04T08:08:37+03:00",
+      "tests": {
+        "passed": 9,
+        "failed": 0
+      }
     },
     {
       "id": "07",
@@ -288,7 +302,10 @@ window.STATE =
     "19_management-reporting.md §12 — сводка значений по умолчанию неполна: пороги из §3.8, §7, §8, §13 помечены на месте, но в сводку не доехали",
     "19_management-reporting.md §7 — число «3–5 одновременных запросов» скопировано из 02_moysklad-integration.md §3 вместо ссылки",
     "19_management-reporting.md §10 — классифицирует мобильность чужих экранов, это зона 18 и 06",
-    "стык 17 и 19 построен в обратную сторону: оценщик дублирует оцениваемого, оцениваемый не ссылается на оценщика ни разу"
+    "стык 17 и 19 построен в обратную сторону: оценщик дублирует оцениваемого, оцениваемый не ссылается на оценщика ни разу",
+    "13_server-capacity §3.1 — арифметика памяти от номинала тарифа, а не от замера: вывод free -h / df -hT в проекте не сохранён",
+    "размер диска после апгрейда сервера не знает ни один файл проекта — стоит заглушкой в четырёх местах",
+    "AGENT_SERVER_SETUP_TASK.md покрывает только подготовку сервера; изоляция проектов, релизы, TLS, секреты, бэкап, security gate и мониторинг не покрыты ничем"
   ],
   "reviewers": {
     "manifestSpec": null,
