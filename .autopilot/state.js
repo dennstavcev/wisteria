@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-03T21:26:07+03:00",
+  "updatedAt": "2026-09-04T08:04:44+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -85,7 +85,7 @@ window.STATE =
       "zone": [
         "05_website-plan/17_readiness-audit.md"
       ],
-      "status": "in-progress",
+      "status": "review",
       "retries": 0,
       "repairs": 0,
       "handoffs": 0,
@@ -105,11 +105,17 @@ window.STATE =
       "zone": [
         "05_website-plan/18_admin-catalog-content.md"
       ],
-      "status": "in-progress",
+      "status": "repair",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 1,
       "handoffs": 0,
-      "startedAt": "2026-09-03T21:26:07+03:00"
+      "startedAt": "2026-09-03T21:26:07+03:00",
+      "repairFindings": [
+        "§5.1 набор бейджей приписан заказчику — он говорил только «бейджи»",
+        "§7 «сообщить, когда появится» — поверхность без требования",
+        "«закупочная цена» вместо «себестоимости» — требование сузилось",
+        "images[] в таблице полей против связки product_site_image — таск 04 не решит без доспроса"
+      ]
     },
     {
       "id": "03",
@@ -124,7 +130,7 @@ window.STATE =
       "zone": [
         "05_website-plan/19_management-reporting.md"
       ],
-      "status": "in-progress",
+      "status": "review",
       "retries": 0,
       "repairs": 0,
       "handoffs": 0,
@@ -145,7 +151,8 @@ window.STATE =
       "wave": 2,
       "zone": [
         "05_website-plan/03_database-schema.md",
-        "05_website-plan/06_admin-dashboard.md"
+        "05_website-plan/06_admin-dashboard.md",
+        "05_website-plan/02_moysklad-integration.md"
       ],
       "status": "pending",
       "retries": 0,
@@ -191,10 +198,14 @@ window.STATE =
       "zone": [
         "05_website-plan/12_design-system-base.md",
         "05_website-plan/13_server-capacity-and-services-plan.md",
-        "05_website-plan/16_ui-design-task.md"
+        "05_website-plan/16_ui-design-task.md",
+        "05_website-plan/09_workflow-tooling.md",
+        "05_website-plan/05_personal-cabinet.md",
+        "05_website-plan/14_security-and-process-decisions.md",
+        "AGENT_SERVER_SETUP_TASK.md"
       ],
       "status": "pending",
-      "retries": 0,
+      "retries": 1,
       "repairs": 0,
       "handoffs": 0
     },
@@ -240,7 +251,11 @@ window.STATE =
     "fixed": 8,
     "deferred": 0
   },
-  "concerns": [],
+  "concerns": [
+    "18_admin-catalog-content.md §11 — внешняя таблица ролей заходит в зону 06_admin-dashboard.md и разойдётся при первой правке там",
+    "18_admin-catalog-content.md §3 — фильтр «без фото» пересекается с 06_admin-dashboard.md §2, пересечение не названо",
+    "18_admin-catalog-content.md §13 — операционный экран заказов не отнесён ни к одному уровню мобильности"
+  ],
   "reviewers": {
     "manifestSpec": null,
     "craft": null
