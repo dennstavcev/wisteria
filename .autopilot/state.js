@@ -1,7 +1,7 @@
 window.STATE =
 {
   "slug": "visteria-dev-readiness",
-  "dir": "2026-09-03-visteria-dev-readiness--wip",
+  "dir": "2026-09-03-visteria-dev-readiness",
   "title": "Вистерия — готовность к разработке и достройка ТЗ",
   "mode": "semi",
   "depth": "deep",
@@ -11,8 +11,8 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-04T16:54:36+03:00",
-  "finishedAt": null,
+  "updatedAt": "2026-09-04T17:08:09+03:00",
+  "finishedAt": "2026-09-04T17:08:09+03:00",
   "stages": [
     {
       "id": "preflight",
@@ -47,25 +47,30 @@ window.STATE =
     },
     {
       "id": "build",
-      "status": "active",
+      "status": "done",
       "startedAt": "2026-09-03T21:25:22+03:00",
-      "note": "6 из 7 тасков сдано"
+      "note": "7 из 7 тасков сдано",
+      "finishedAt": "2026-09-04T17:08:09+03:00"
     },
     {
       "id": "review",
-      "status": "active",
+      "status": "done",
       "startedAt": "2026-09-04T08:08:37+03:00",
-      "note": "проверено 6 из 7"
+      "note": "проверено 7 из 7, 4 дозапроса",
+      "finishedAt": "2026-09-04T17:08:09+03:00"
     },
     {
       "id": "final",
-      "status": "pending"
+      "status": "done",
+      "startedAt": "2026-09-04T17:08:09+03:00",
+      "finishedAt": "2026-09-04T17:08:09+03:00",
+      "note": "слепая приёмка: расхождений нет"
     }
   ],
   "requirements": {
     "total": 14,
-    "done": 10,
-    "inTicket": 4,
+    "done": 14,
+    "inTicket": 0,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -315,7 +320,7 @@ window.STATE =
         "05_website-plan/20_start-here.md",
         "00_README.md"
       ],
-      "status": "review",
+      "status": "done",
       "retries": 0,
       "repairs": 1,
       "handoffs": 0,
@@ -325,15 +330,40 @@ window.STATE =
         "§2 продублировал привязку «пункт → этап» из 07_roadmap; срок по ротации токена разошёлся в трёх местах",
         "по пунктам заказчика не сказано, что блокируется, пока пункт не сделан",
         "дерево в 00_README.md — закрывается финальной правкой"
-      ]
+      ],
+      "finishedAt": "2026-09-04T17:08:09+03:00",
+      "commit": "2e73fa7",
+      "files": [
+        "05_website-plan/20_start-here.md",
+        "00_README.md",
+        "05_website-plan/17_readiness-audit.md",
+        "05_website-plan/09_workflow-tooling.md"
+      ],
+      "tests": {
+        "passed": 10,
+        "failed": 0
+      }
     }
   ],
   "singlePass": null,
-  "tests": null,
+  "tests": {
+    "passed": 14,
+    "failed": 0
+  },
   "debt": {
-    "placeholders": [],
+    "placeholders": [
+      "План продаж по месяцам — 19_management-reporting.md §3.5",
+      "Режим НДС в выручке и метод себестоимости — 19_... §12.1",
+      "Получатели еженедельного дайджеста — 19_... §13",
+      "Второй фактор для роли florist — 03_database-schema.md §2.1",
+      "Фактический free -h и размер диска сервера — 13_server-capacity §1, §3.1, §5",
+      "Назначение bloom_hero.HEIC — 00_README.md"
+    ],
     "assumptions": [],
-    "emptyEnv": []
+    "emptyEnv": [
+      "MOYSKLAD_API_TOKEN",
+      "TOTP_ENCRYPTION_KEY"
+    ]
   },
   "additions": [
     "Роль `florist` отдельно от `manager` — чтобы тот, кто грузит фото, не видел выручку — ради R05",
