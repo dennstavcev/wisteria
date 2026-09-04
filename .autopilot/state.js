@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-04T08:19:16+03:00",
+  "updatedAt": "2026-09-04T12:02:57+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -49,7 +49,7 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-03T21:25:22+03:00",
-      "note": "2 из 7 тасков сдано"
+      "note": "3 из 7 тасков сдано"
     },
     {
       "id": "review",
@@ -64,8 +64,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 14,
-    "done": 4,
-    "inTicket": 10,
+    "done": 6,
+    "inTicket": 8,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -88,7 +88,7 @@ window.STATE =
       "zone": [
         "05_website-plan/17_readiness-audit.md"
       ],
-      "status": "repair",
+      "status": "done",
       "retries": 0,
       "repairs": 1,
       "handoffs": 0,
@@ -99,7 +99,16 @@ window.STATE =
         "§8.1 п.12 просит апгрейд сервера, уже выполненный по §5 №4",
         "§8.1 и §10 дублируют действия заказчика, сроки разошлись",
         "§4/§7/§9.3 пересказывают содержание оцениваемых файлов вместо ссылок"
-      ]
+      ],
+      "finishedAt": "2026-09-04T11:53:08+03:00",
+      "commit": "f271267",
+      "files": [
+        "05_website-plan/17_readiness-audit.md"
+      ],
+      "tests": {
+        "passed": 10,
+        "failed": 0
+      }
     },
     {
       "id": "02",
@@ -189,11 +198,15 @@ window.STATE =
         "05_website-plan/06_admin-dashboard.md",
         "05_website-plan/02_moysklad-integration.md"
       ],
-      "status": "in-progress",
+      "status": "review",
       "retries": 0,
       "repairs": 0,
-      "handoffs": 0,
-      "startedAt": "2026-09-04T08:19:16+03:00"
+      "handoffs": 1,
+      "startedAt": "2026-09-04T08:19:16+03:00",
+      "tests": {
+        "passed": 3,
+        "failed": 0
+      }
     },
     {
       "id": "05",
@@ -214,10 +227,14 @@ window.STATE =
         "05_website-plan/10_pre-development-checklist.md",
         "05_website-plan/00_overview.md"
       ],
-      "status": "pending",
-      "retries": 0,
+      "status": "review",
+      "retries": 1,
       "repairs": 0,
-      "handoffs": 0
+      "handoffs": 0,
+      "tests": {
+        "passed": 10,
+        "failed": 0
+      }
     },
     {
       "id": "06",
@@ -305,7 +322,13 @@ window.STATE =
     "стык 17 и 19 построен в обратную сторону: оценщик дублирует оцениваемого, оцениваемый не ссылается на оценщика ни разу",
     "13_server-capacity §3.1 — арифметика памяти от номинала тарифа, а не от замера: вывод free -h / df -hT в проекте не сохранён",
     "размер диска после апгрейда сервера не знает ни один файл проекта — стоит заглушкой в четырёх местах",
-    "AGENT_SERVER_SETUP_TASK.md покрывает только подготовку сервера; изоляция проектов, релизы, TLS, секреты, бэкап, security gate и мониторинг не покрыты ничем"
+    "AGENT_SERVER_SETUP_TASK.md покрывает только подготовку сервера; изоляция проектов, релизы, TLS, секреты, бэкап, security gate и мониторинг не покрыты ничем",
+    "02_moysklad-integration.md §4.2 — распределение девяти новых сущностей по инкрементальному и ночному прогонам проставлено значением по умолчанию: 19 §7 его не задаёт",
+    "10_pre-development-checklist.md «Итог» и 07_roadmap-phases.md привязка «пункт → этап» уже разошлись: четыре пункта против шести",
+    "07_roadmap-phases.md блок зависимостей называет источником модерации Этап 4, тогда как сам ставит её в Этап 2",
+    "07_roadmap-phases.md п.15 §8.1 привязан к Этапу 5 целиком, но порог устаревания данных нужен уже Этапу 4",
+    "10_pre-development-checklist.md шапка столбца «Статус на 03.09.2026» стоит над строками от 04.09.2026",
+    "07_roadmap-phases.md шапка обещает оценки в неделях, которых в пересобранной карте нет (унаследовано)"
   ],
   "reviewers": {
     "manifestSpec": null,
