@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/.claude/skills/autopilot",
   "startedAt": "2026-09-03T20:50:00+03:00",
-  "updatedAt": "2026-09-04T08:04:44+03:00",
+  "updatedAt": "2026-09-04T08:11:17+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -48,11 +48,14 @@ window.STATE =
     {
       "id": "build",
       "status": "active",
-      "startedAt": "2026-09-03T21:25:22+03:00"
+      "startedAt": "2026-09-03T21:25:22+03:00",
+      "note": "1 из 7 тасков сдан, 3 написаны"
     },
     {
       "id": "review",
-      "status": "pending"
+      "status": "active",
+      "startedAt": "2026-09-04T08:08:37+03:00",
+      "note": "01 и 03 на ревью"
     },
     {
       "id": "final",
@@ -61,8 +64,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 14,
-    "done": 1,
-    "inTicket": 13,
+    "done": 3,
+    "inTicket": 11,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -85,11 +88,18 @@ window.STATE =
       "zone": [
         "05_website-plan/17_readiness-audit.md"
       ],
-      "status": "review",
+      "status": "repair",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 1,
       "handoffs": 0,
-      "startedAt": "2026-09-03T21:26:07+03:00"
+      "startedAt": "2026-09-03T21:26:07+03:00",
+      "repairFindings": [
+        "§4/§7 оценивают 02_moysklad-integration.md как «Готово, не трогать» — 19 §2.2 доказал отсутствие девяти сущностей",
+        "§8.1 знает один вопрос заказчику по отчётности из семи",
+        "§8.1 п.12 просит апгрейд сервера, уже выполненный по §5 №4",
+        "§8.1 и §10 дублируют действия заказчика, сроки разошлись",
+        "§4/§7/§9.3 пересказывают содержание оцениваемых файлов вместо ссылок"
+      ]
     },
     {
       "id": "02",
@@ -105,7 +115,7 @@ window.STATE =
       "zone": [
         "05_website-plan/18_admin-catalog-content.md"
       ],
-      "status": "repair",
+      "status": "done",
       "retries": 0,
       "repairs": 1,
       "handoffs": 0,
@@ -115,7 +125,16 @@ window.STATE =
         "§7 «сообщить, когда появится» — поверхность без требования",
         "«закупочная цена» вместо «себестоимости» — требование сузилось",
         "images[] в таблице полей против связки product_site_image — таск 04 не решит без доспроса"
-      ]
+      ],
+      "finishedAt": "2026-09-04T08:08:37+03:00",
+      "commit": "b2cf1ff",
+      "files": [
+        "05_website-plan/18_admin-catalog-content.md"
+      ],
+      "tests": {
+        "passed": 11,
+        "failed": 0
+      }
     },
     {
       "id": "03",
@@ -130,11 +149,18 @@ window.STATE =
       "zone": [
         "05_website-plan/19_management-reporting.md"
       ],
-      "status": "review",
+      "status": "repair",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 1,
       "handoffs": 0,
-      "startedAt": "2026-09-03T21:26:07+03:00"
+      "startedAt": "2026-09-03T21:26:07+03:00",
+      "repairFindings": [
+        "D02 не доставлено: коллизия термина «списание» не названа ни разу на 25 вхождений",
+        "§6 не знает неверного ввода — перевёрнутый период, будущая дата, удалённый склад",
+        "§9 приписывает себе метку A01, принадлежащую 18",
+        "§12 сводка значений по умолчанию неполна",
+        "§7 дублирует число из 02_moysklad-integration.md; §10 классифицирует чужие экраны"
+      ]
     },
     {
       "id": "04",
@@ -204,10 +230,11 @@ window.STATE =
         "05_website-plan/14_security-and-process-decisions.md",
         "AGENT_SERVER_SETUP_TASK.md"
       ],
-      "status": "pending",
+      "status": "in-progress",
       "retries": 1,
       "repairs": 0,
-      "handoffs": 0
+      "handoffs": 0,
+      "startedAt": "2026-09-04T08:08:37+03:00"
     },
     {
       "id": "07",
@@ -254,7 +281,14 @@ window.STATE =
   "concerns": [
     "18_admin-catalog-content.md §11 — внешняя таблица ролей заходит в зону 06_admin-dashboard.md и разойдётся при первой правке там",
     "18_admin-catalog-content.md §3 — фильтр «без фото» пересекается с 06_admin-dashboard.md §2, пересечение не названо",
-    "18_admin-catalog-content.md §13 — операционный экран заказов не отнесён ни к одному уровню мобильности"
+    "18_admin-catalog-content.md §13 — операционный экран заказов не отнесён ни к одному уровню мобильности",
+    "17_readiness-audit.md §4, §7, §9.3 — обоснования вердиктов пересказывают содержание оцениваемых файлов вместо ссылки на раздел; на первой правке оригинала аудит начнёт врать",
+    "17_readiness-audit.md §8.1 против §10 — две таблицы одних и тех же действий заказчика, сроки уже разошлись",
+    "17_readiness-audit.md §8.1 п.12 — просит заказчика пройти апгрейд сервера, который §5 №4 того же файла фиксирует как выполненный",
+    "19_management-reporting.md §12 — сводка значений по умолчанию неполна: пороги из §3.8, §7, §8, §13 помечены на месте, но в сводку не доехали",
+    "19_management-reporting.md §7 — число «3–5 одновременных запросов» скопировано из 02_moysklad-integration.md §3 вместо ссылки",
+    "19_management-reporting.md §10 — классифицирует мобильность чужих экранов, это зона 18 и 06",
+    "стык 17 и 19 построен в обратную сторону: оценщик дублирует оцениваемого, оцениваемый не ссылается на оценщика ни разу"
   ],
   "reviewers": {
     "manifestSpec": null,
