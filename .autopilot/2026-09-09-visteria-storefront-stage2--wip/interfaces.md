@@ -1,0 +1,323 @@
+# Что уже построено
+
+Читается каждым исполнителем до начала работы. Не изобретай заново то, что здесь есть.
+
+Код: `C:/Users/Denn/claude_projects/visteria-website`.
+База знаний и ТЗ: `C:/Users/Denn/claude_projects/website_visteria`. Кода в базе знаний быть не должно.
+
+## Границы, решённые в спецификации
+
+| Модуль | Владеет | Выставляет | Прячет |
+|---|---|---|---|
+| `packages/db` | вся схема и запросы к ней | `listPublicProducts`, `getPublicProduct`, `cartRepo`, `orderRepo`, `wholesaleRepo`, `contentRepo`, `mediaRepo` | SQL и соединение |
+| `apps/api` — `catalog` | публичное чтение каталога | `GET /catalog/products`, `GET /catalog/products/:slug`, `GET /catalog/categories` | белый список полей |
+| `apps/api` — `cart` | корзина и её правила | `GET/POST/PATCH/DELETE /cart` | привязку к cookie, пересчёт сумм |
+| `apps/api` — `checkout` | создание заказа | `POST /checkout` | валидацию, идемпотентность, постановку в очередь |
+| `apps/api` — `wholesale` | заявки и доступ опта | `POST /wholesale/request`, `GET /wholesale/price`, `POST /admin/wholesale/:id/decision` | выдачу и проверку ссылки |
+| `apps/api` — `admin` | управление карточкой и медиа | `GET/PATCH /admin/products`, `POST /admin/media`, `POST /admin/products/:id/publish`, `GET /admin/products/:id/revisions` | правило приоритета полей, запись ревизий |
+| `apps/api` — `webhooks` | приём событий МойСклад | `POST /webhooks/moysklad` | идемпотентность, проверку подлинности |
+| `apps/api` — `access` | роли и сериализация | `requireRole()`, `serialize(entity, role)` | белые списки полей по ролям |
+| `apps/sync-worker` — `orders` | обратная запись и сверка статусов | задания `order_push`, `order_status_poll` | контракт документов МойСклад |
+| `apps/web` | экраны витрины, кроме главной | `/catalog`, `/catalog/[slug]`, `/cart`, `/checkout`, `/opt`, `/legal` | обращение к бэкенду |
+| `apps/admin` | экраны управленки | приложение управленки | обращение к бэкенду |
+
+**Швов для проверок три, и все уже существуют:** HTTP бэкенда, репозитории `packages/db` на
+настоящем PostgreSQL, внедряемый транспорт МойСклад. Новых швов не заводить.
+
+## Что построено Этапом 1 и переиспользуется
+
+`@visteria/db`: `createDatabase(connectionString)` → `{db, pool, query, transaction, close}`,
+`SqlExecutor`, `migrate(executor)`, `checkReadiness(executor)`,
+`listPublicProducts(executor, CatalogQuery)`. Деньги — строки. `PublicProduct.id` — id карточки сайта.
+
+`@visteria/moysklad-client`: `MoyskladClient` с Bearer, gzip, пагинацией по `nextHref`,
+ограниченными повторами на 429 и 5xx, паузой на 401/403, `list<T>(path, limit=1000)`,
+`stock(type, changedSince)`, безопасным `download` по белому списку хостов.
+
+`@visteria/sync-worker`: `CatalogSync.run('full_catalog' | 'stock_incremental')`, очередь
+`visteria-sync` на BullMQ, concurrency 1, `haltScheduleOnAuth`. **Синхронизация принята и
+закоммичена — не переписывать.**
+
+`@visteria/api`: `createApi({database, config, log})`, `GET /health`, `GET /ready`,
+`GET /catalog/products`. Коды ошибок ровно четыре: `invalid_query` 400, `not_found` 404,
+`too_many_requests` 429, `internal` 500. Ответ ошибки — `{error:{code, message, requestId}}`,
+заголовок `X-Request-Id` в каждом ответе. CORS отвечает раньше лимита запросов.
+Элемент `images` в публичном ответе — `{storageKey, alt, variants}`, метаданные файла наружу
+не уходят.
+
+**Схема базы создана целиком.** `orders`, `order_items`, `carts`, `cart_items`, `cart_events`,
+`users`, `sessions`, `addresses`, `webhook_events`, `content_revision`, `media_asset`,
+`product_site_image`, `badge`, `promo_codes` уже есть и стоят пустыми. Этап 2 их наполняет.
+Новая таблица или колонка — только с обоснованием «почему существующей не хватило», в CONCERNS.
+
+## Общие правила проекта
+
+Node ≥22, pnpm 9.12.0, TypeScript, NestJS в бэкенде, Next.js 15 и Tailwind v4 на витрине,
+React и Vite в управленке, PostgreSQL 16, Redis и BullMQ, Drizzle.
+
+Команды: `pnpm install --frozen-lockfile`, `pnpm build` (обязательно до тестов — пакеты
+экспортируют JS из `dist`), `pnpm typecheck`, `pnpm test`, `pnpm lint`.
+Один файл тестов: `pnpm --filter <пакет> exec tsx --test test/<имя>.test.ts`.
+
+Docker в системе есть. `pnpm infra:up` поднимает Redis и PostgreSQL, но порт 5432 бывает занят
+чужим контейнером — тогда поднимай `postgres:16-alpine` на другом порту и передавай
+`TEST_DATABASE_URL`. Это не отсутствие Docker.
+
+## Чего не трогать никому
+
+- **Главная страница витрины, бабочки, бренд, шрифты, `DESIGN.md`, `PRODUCT.md`,
+  `packages/ui-kit`** — зона Клода, работа не закончена. Решение пользователя 09.09.2026.
+- **`products`** — зеркало МойСклад, перезаписывается синхронизацией целиком. Правки руками
+  там не выживают и падают молча. Всё человеческое пишется в `product_site`.
+- Колонки `images[]` в `product_site` нет: фото связаны только через `product_site_image`.
+- Корневые `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.base.json`,
+  `eslint.config.mjs`, `.github/`, `.env.example`, `CLAUDE.md` — вне зон тасков.
+  Новое имя переменной сообщается оркестратору, он вписывает.
+- Значения секретов не читать и не писать. Только имена. В боевой МойСклад не ходить.
+
+Не хватает зависимости — не ставь сам: верни `BLOCKED` или назови её в CONCERNS,
+общий install запускает оркестратор одним процессом. Коммиты делает оркестратор после ревью.
+
+## Из таска 01 — слой данных и доступ (09.09.2026, ждёт ревью)
+
+Первый аргумент везде `executor: SqlExecutor`. Деньги — строки. Транзакцию открывает вызывающий.
+
+**Каталог:** `listPublicProducts(CatalogQuery)`, `getPublicProduct(slug)`, `getPublicProductBySiteId(siteId)`, `listPublicCategories()`, `listSimilarProducts(siteId, limit=4)`, `listStoreAvailability(moyskladId)`.
+
+**`cartRepo`:** `create(userId?)`, `get(cartId)`, `getForUser(userId)`, `addItem(cartId, productId, qty)`, `setQuantity(cartId, productId, qty)`, `setQuantityIfCurrent(cartId, productId, qty, expected)`, `removeItem(cartId, productId)`, `clear(cartId)`, `attachUser(cartId, userId)`.
+
+`setQuantityIfCurrent` дописан таском 04 (11.09.2026): критерий «две вкладки одного покупателя не
+затирают друг друга молча» невыразим через `setQuantity`, который всегда перезаписывает.
+Отдаёт `{applied: true, mutation}` либо `{applied: false, cart, current}` — версия разошлась,
+и чужое изменение осталось нетронутым.
+
+`addItem` прибавляет к уже лежащему ОДНИМ оператором (`ON CONFLICT DO UPDATE` считает сумму
+под блокировкой строки): два одновременных «в корзину» дают две штуки. Транзакция для этого
+не нужна, и `SqlExecutor` остаётся тем же одиночным запросом — вызывающему её открывать незачем.
+
+**Деньги корзины считаются один раз и только здесь.** `packages/db/src/cart.ts`, выражение
+`PAYABLE`: оплачиваемое количество позиции — `least(quantity, остаток)`, у непродаваемого товара
+ноль. `CartLine.payable`, `CartLine.lineTotal` (цена × `payable`) и `CartView.subtotal` (сумма
+`lineTotal`) приходят посчитанными из SQL; `apps/api` и витрина их только показывают.
+**Оформление заказа берёт к оплате `CartView.subtotal` и позиции по `payable`, а не по `quantity`**
+— иначе покупателю выставят счёт за букет, который кончился, пока он думал. Второго определения
+оплачиваемой суммы в проекте нет; заводить его в `checkout` нельзя.
+
+**`orderRepo`:** `create(OrderInput)` — идемпотентно по `syncId`, `get(id)`, `getBySyncId(syncId)`, `getByNumber(n)`, `list(OrderQuery)`, `setStatus(id, status, {moyskladOrderId?, courierDispatchNote?})`. Отказ — `OrderRejected` с кодом `empty_order`, `invalid_quantity`, `not_purchasable`, `insufficient_stock`.
+
+**`wholesaleRepo`:** `createRequest`, `get`, `list`, `decide(id, 'approved'|'rejected', decidedBy, comment?)`, `issueAccess(requestId, token, ttlDays)`, `resolveAccess(token)`, `revokeAccess(token)`. **В базе лежит только sha256 токена, не сам токен.**
+
+**`contentRepo`:** `list(AdminProductQuery)`, `get(siteId)`, `getByMoyskladId(ms)`, `ensure(ms, userId)`, `update(siteId, patch, userId, comment?)`, `publishCheck(siteId)` → `{ok, blocking: no_mirror|no_price|no_slug|no_photo, warnings: no_description|no_seo}`, `setPublished`, `setArchived`, `revisions(entityType, entityId, {limit, offset})`, `rollback(revisionId, userId)`.
+
+**`mediaRepo`:** `create`, `get`, `update(id, {alt?, focalPoint?, variants?})`, `softDelete`, `listImages(siteId)`, `attach(siteId, assetId, position?)`, `detach`, `reorder(siteId, assetIds[])`.
+
+**Доступ, `apps/api/src/access`:** `requireRole(actual, allowed[])` → роль либо `AccessDenied`; `serialize(kind, entity, role)`, `serializeMany(kind, entities, role)`, `allowedFields(kind, role)`, `ROLE_FIELDS`. Виды сущностей: `product`, `order`, `orderLine`, `cart`, `cartLine`, `customer`, `wholesaleRequest`, `mediaAsset`, `revision`.
+
+Сигнатура именно `serialize(kind, entity, role)`, а не `serialize(entity, role)`: белый список задан по виду сущности, а сущность о себе этого не сообщает. Вложенные списки — `order.items`, `cart.items` — режутся своим списком, иначе цена покупки уехала бы наружу внутри позиции.
+
+**`requireRole` закрыт по умолчанию:** пустая роль получает отказ. Кто заполняет роль актора в запросе — вопрос тасков эндпойнтов, здесь не решён. Таски 03 и 05, это ваш вопрос.
+
+### Права на запись — контракт для эндпойнтов управленки
+
+Белые списки выше описывают только **чтение**: какие поля уходят наружу. Кому позволено эти поля **менять** — второй контракт, в том же модуле `apps/api/src/access`. Своего разграничения эндпойнтам не придумывать: и `contentRepo.update`, и `contentRepo.rollback` принимают любой патч, поэтому право спрашивается здесь или не спрашивается нигде.
+
+```ts
+type ContentWrite = 'card.edit' | 'card.publish' | 'card.unpublish' | 'card.archive' | 'card.slug' | 'card.seo'
+  | 'collection.edit' | 'landing.edit' | 'badge.manage' | 'revision.rollback';
+CONTENT_WRITE: Readonly<Record<ContentWrite, readonly ActorRole[]>>
+requireWrite(action: ContentWrite, actual: UserRole | null | undefined): ActorRole  // роль либо AccessDenied
+canWrite(action: ContentWrite, actual: UserRole | null | undefined): boolean        // только для отрисовки
+actionsForPatch(patch: object): ContentWrite[]                                      // без повторов, отсортированы
+requirePatch(patch: object, actual: UserRole | null | undefined): ActorRole
+```
+
+| Действие | Репозиторий | `florist` | `manager` | `admin` |
+|---|---|---|---|---|
+| `card.edit` — карточка, фото, бейджи на ней, `sort_weight` | `contentRepo.update`, `mediaRepo.*` | да | да | да |
+| `card.publish` | `setPublished(true)` | да | да | да |
+| `card.unpublish` | `setPublished(false)` | **нет** | да | да |
+| `card.archive` | `setArchived` | **нет** | да | да |
+| `card.slug` — адрес страницы | `update({slug})` | **нет** | да | да |
+| `card.seo` — `seoTitle`, `seoDescription`, `h1` | `update({seo*, h1})` | **нет** | да | да |
+| `collection.edit` — подборки | таск подборок | да | да | да |
+| `landing.edit` — лендинги, блоки главной, блог | таск контента | **нет** | да | да |
+| `badge.manage` — завести или переименовать бейдж | таск бейджей | **нет** | да | да |
+| `revision.rollback` | `contentRepo.rollback` | **нет** | да | да |
+
+Значения — таблица прав `18_admin-catalog-content.md` §12, строка в строку. Чтение журнала изменений — тоже строка §12, но она уже выражена белым списком `revision`, открытым всем трём ролям, и второй раз не заводится.
+
+**Патч разбирается по полям.** Правка карточки — один вызов с произвольным набором полей, и «флористу нельзя менять slug» иначе невыразимо: отдельного эндпойнта под slug нет. `actionsForPatch` переводит `ProductSitePatch` в права: `title`, `descriptionHtml`, `badges`, `sortWeight` → `card.edit`; `slug` → `card.slug`; `seoTitle`, `seoDescription`, `h1` → `card.seo`.
+
+**Закрыто по умолчанию, как и чтение.** Поле, не названное в этой таблице, не пишет никто — `actionsForPatch` отвечает `AccessDenied` даже администратору. Новое поле слоя сайта приходит закрытым, и открыть его можно только вписав строку в `PATCH_WRITE`.
+
+Эндпойнт управленки спрашивает оба контракта: `requireWrite`/`requirePatch` — можно ли писать, `serialize(kind, entity, role)` — что вернуть в ответе.
+
+### Шесть изменений схемы, каждое обосновано в шапке миграции `0003_storefront_stage2.sql`
+
+Список здесь и нумерованный список в шапке миграции — одно и то же, слово в слово.
+Изменение, которого нет в обоих, считается незаявленным.
+
+1. `carts.user_id` стал необязательным: гость не заводится в `users`.
+2. `orders` получили контакты гостевого заказа и адрес текстом: `addresses.user_id` обязателен, адрес гостя туда не ложится.
+3. `orders.card_text` отдельно от `comment`: открытка печатается, пожелание читает менеджер.
+4. Индекс `orders_status_time` на `orders (status, created_at)`: `orderRepo.list` только так заказы и читает — отбор по статусу, сортировка по времени; без индекса каждое открытие экрана управленки идёт полным проходом по таблице, которая растёт и не чистится.
+5. Новая таблица `wholesale_request` — с индексом `wholesale_request_status_time` и проверкой `wholesale_decision_complete`: в схеме был только флаг `users.wholesale_status`, а компании, ИНН, объёму и автору решения места не было.
+6. `sessions.user_id` стал необязательным, добавлены `wholesale_request_id` и проверка «субъект обязателен»: форма заявки не даёт ни Telegram, ни VK, а идентичность пользователя их требует.
+
+Флористу отдаётся розничная цена — она и так на витрине — но не оптовая.
+Имена дополнительных полей МойСклад для повода, состава и цвета приходят из конфигурации.
+Незнакомое имя даёт пустую выдачу, и это зафиксировано тестом.
+
+## Из таска 02 — каталог и карточка на витрине (11.09.2026, ждёт ревью)
+
+Эндпойнты: `GET /catalog/products` → `{items, limit, offset}`; `GET /catalog/products/:slug` → `{product, stores, similar}`; `GET /catalog/filters` → `{categories, priceSegments, facets}`; `GET /catalog/categories` → `{items}`.
+Ключи ценовых сегментов: `do-1500`, `1500-3000`, `3000-4000`, `4000-5000`, `ot-5000`.
+Маршруты витрины: `/catalog?category&price&inStock&occasion&flower&color&offset`, `/product/[slug]`.
+
+**Общее для экранов витрины — брать отсюда, второго не заводить:**
+`catalog/_lib/api.ts` — `fetchCatalog`, `fetchProduct`, `fetchFilters`, `mediaUrl`, `formatMoney`, `stockCount`.
+`catalog/_lib/query.ts` — `parseSelection`, `translate`, `href`, `PAGE_SIZE = 24`.
+`catalog/_lib/html.ts` — `sanitizeHtml`, `toPlainText`. Вырезает содержимое `script` и `style`: текст скрипта из описания уезжал в описание страницы и в разметку для поисковика.
+`catalog/_lib/text.ts` — `counted`.
+`catalog/_components/tile.tsx` — `CatalogTile`, `Photo`, `PriceTag`, `StockBadge`, `cascade`.
+`catalog/_components/states.tsx` — `LoadFailed`, `NothingFound`, `EmptyCatalog`.
+
+**Переменные окружения.** Витрина читает две: `API_BASE_URL` — адрес бэкенда (без неё
+витрина идёт в `http://127.0.0.1:3001` и на боевом сервере не найдёт там ничего),
+`MEDIA_BASE_URL` — адрес файлового хранилища кадров (пустая означает «кадров нет»,
+и витрина честно рисует плиту-заглушку вместо битой картинки).
+
+Фильтры каталога читает бэкенд, и это ещё три имени: `CATALOG_FACET_OCCASION`,
+`CATALOG_FACET_FLOWER`, `CATALOG_FACET_COLOR` — по одной на фасет, вида
+`имя доп. поля МойСклад=значение,значение`. **Незаданная переменная означает, что
+фасета нет вовсе:** `/catalog/filters` не отдаёт чип, а параметр `occasion`, `flower`
+или `color` получает `400 invalid_query`. Пустыми они и стоят: имена доп. полей знает
+только заказчик, и пока он их не назвал, фильтры «повод» и «цветок» из первоисточника
+на боевом сервере не появятся, а состав в карточке останется пустым — его даёт то же
+поле, что `CATALOG_FACET_FLOWER`. Строка не такого вида — `ConfigError` при запуске,
+с именем переменной и без её значения.
+
+**Адрес сайта записан один раз** — `metadataBase` корневого макета `app/layout.tsx`.
+Домен заказчика вистерия74.рф, в punycode `xn--74-dlcmob9cgj7k.xn--p1ai`; сверять
+расшифровкой, а не глазом. Микроразметка карточки берёт его оттуда
+(`site.metadataBase?.origin`) и строкой не повторяет: `storefront.test.ts` считает
+упоминания домена в исходниках витрины и требует ровно одного.
+
+**Тесты витрины:** `pnpm --filter @visteria/web test` → `tsx --test test/*.test.ts`,
+`node:test` без новых зависимостей. Первый набор — `apps/web/test/html.test.ts`,
+граница очистки разметки: скрипт, обработчик события, ссылка `javascript:`.
+`tsc --noEmit` каталог `test/` не охватывает (в `include` витрины только `src`).
+
+`fetchProduct` обёрнут в `cache` из React: `generateMetadata` и сама страница получают
+один ответ, и один заход покупателя в карточку стоит одного запроса к API.
+
+**Шов для корзины.** Кнопки «В корзину» на карточке нет: корзина — таск 04, а орган без действия витрине запрещён дизайном. На её месте сейчас телефон, место помечено комментарием. Таск 04, это твоё место.
+
+Счётчик «в наличии сегодня» в шапке — заглушка: ни один эндпойнт такого числа не отдаёт, стоит число товаров в категории.
+Бабочек на экранах каталога нет: компонент жёстко ждёт три точки старта и три посадки главной, а править его нельзя.
+
+## Из таска 03 — управленка: каркас, список товаров, служебный вход (11.09.2026, ждёт ревью)
+
+Эндпойнты: `GET /admin/session` → `{userId, role, can}`; `GET /admin/products?limit,offset,search,withoutPhoto,withoutDescription,unpublished,zeroStock,withoutSeo,categoryId,storeId` → `{items, limit, offset}`; `GET /admin/categories`; `GET /admin/stores` → `{items: StoreDirectoryEntry[]}`; `POST /admin/products/ensure` `{moyskladId}` → строка списка созданной карточки, 201; `POST /admin/products/bulk` `{action: publish|unpublish|setSortWeight|addBadge|removeBadge, ids ≤100, sortWeight?, badgeId?}` → `{done[], failed[{id, reason}]}`.
+
+`GET /admin/stores` и `POST /admin/products/ensure` в исходном контракте таска названы не были и объявляются здесь: справочник складов нужен фильтру по складу — иначе флорист вводит UUID руками; `ensure` нужен потому, что список показывает и товары зеркала без карточки сайта (см. ниже), а править нечего, пока карточки нет.
+
+**Список отдаёт строки с пустым `id`.** `GET /admin/products` показывает и товар МойСклад, у которого карточки сайта ещё нет: у такой строки `id: null`, `hasSiteCard: false`, а `effectiveTitle`, `mirrorSlug`, `priceRetail` и остаток приходят из зеркала. Это не ошибка выдачи и не строка-заглушка: новый товар приезжает синхронизацией, и не показывать его значило бы прятать от флориста ровно ту работу, ради которой он открыл список. **Редактор карточки (таск 05) обязан это учесть:** `PATCH /admin/products/:id` по такой строке звать нечем — сначала `POST /admin/products/ensure {moyskladId}`, он возвращает строку уже с `id`.
+
+Вход: `POST /admin/login {login, password}` → сессия в cookie `visteria_staff`, HttpOnly, Secure, SameSite=Strict, в базе только sha256 токена. `POST /admin/logout` гасит сессию.
+Нечитаемая cookie (`visteria_staff=%` — оборванная процентная последовательность) читается как её отсутствие: ответ 401, а не 500. Пятисотый ответ на подобранное значение отличал бы «сервер сломался здесь» от «дверь закрыта».
+
+**Как таски 05 и 07 получают актора.** Шов прежний: `ApiOptions.staffAuth: (Request) => AdminActor|null`. Либо подставляете функцию в тестах, либо берёте готовый `staffLogin.authenticate`. Роль из тела запроса не читается никогда и перечитывается из `staff_allowlist` на каждом запросе.
+
+**Контракт прав вызывается отсюда, своих списков ролей не заводить:** `guard(actor, CONTENT_ROLES)` — допуск в раздел, `guardWrite(actor, action)` — действие целиком, `guardPatch(actor, patch)` — по составу правки, `writePermissions(role)` — карта для отрисовки кнопок.
+Отказ переводится в HTTP один раз: нет сессии → 401 `unauthorized`, опознан но не вправе, включая поле вне таблицы прав → 403 `forbidden`.
+
+Решения заказчика 11.09.2026: служебный вход открывает только `florist`, без второго фактора. `manager` и `admin` им не открываются — для них обязательный TOTP остаётся требованием следующего этапа входа, и это названо в коде, README и на экране, а не подразумевается.
+
+**Изменение схемы, миграция `0004_staff_service_login.sql`:** перечисление ролей персонала получило значение `florist`. Обоснование в шапке миграции. Миграция `0003` не тронута, она закоммичена. Следствие: утверждение в `packages/db/test/database.test.ts`, что флорист отклоняется, перевёрнуто.
+
+### Назначение сессии — миграция `0005_session_purpose.sql`, читать всем, кто выдаёт сессии
+
+`sessions.purpose` типа `session_purpose`, значения `'staff'` и `'client'`, `NOT NULL DEFAULT 'client'`. Обоснование — в шапке миграции; `0003` и `0004` не тронуты, они закоммичены.
+
+Строка сессии персонала ничем не отличалась от любой другой сессии того же человека: субъект, срок и отзыв — одни и те же колонки, назначения в строке не было. Проверка входа читалась как «у этого человека есть живая сессия», а не «этот человек вошёл служебным входом», и управленку открывала **любая** живая сессия допущенного сотрудника — в том числе тридцатидневная ссылка опта из `wholesaleRepo.issueAccess`.
+
+Что из этого следует тому, кто выдаёт сессию:
+
+- **Служебный вход** пишет `purpose='staff'` и требует его же в `authenticate`; `POST /admin/logout` гасит только строки `'staff'`.
+- **Всякая другая сессия — клиентская, и получает `'client'` умолчанием колонки.** Ссылка опта по приглашению (`wholesaleRepo.issueAccess`), вход покупателя Этапа 3 — управленку они не открывают, и делать для этого ничего не надо. Умолчание закрытое, как `requireRole` и `actionsForPatch`: назначение называет тот, кому нужна дверь, а не тот, кто про неё не знает.
+- `wholesale_request_id` признаком назначения **не является**: у клиентской сессии Этапа 3 он будет пуст, и «пуст — значит служебная» сломается на первом же новом способе входа.
+- Роль персонала перечитывается из `staff_allowlist` на каждом запросе, и срок сессии проверяет сервер по `expires_at`. Оба свойства утверждены тестами в `apps/api/test/admin.test.ts`: строка допуска, повышенная до менеджера, закрывает выданную флористу сессию; просроченная сессия даёт 401. Снять любую из двух проверок, не уронив прогон, нельзя — проверено мутацией.
+
+### Изменение в чужой зоне: `contentRepo.list` в `packages/db/src/content.ts`
+
+**Зачем понадобилось трогать чужую зону:** критерий приёмки «флорист видит список товаров» невыполним без товаров, у которых карточки сайта ещё нет, — а прежний `LEFT JOIN` от `product_site` их физически не возвращал, и запрос этот живёт только в `packages/db`.
+
+Объявляется задним числом — таск 03 этого не объявил, а таск 05 строит редактор карточки поверх той же выдачи:
+
+1. Соединение: было `FROM product_site ps LEFT JOIN products p`, стало `FROM products p FULL JOIN product_site ps`. Следствия: в выдаче появились товары зеркала без карточки (`id: null`, `hasSiteCard: false`) и сохранилась архивная карточка, чей товар из МойСклад уже исчез.
+2. Поля строки: добавлено `hasSiteCard`; `moyskladId`, `badges`, `sortWeight`, `isPublished` и `updatedAt` теперь берутся через `coalesce` со стороной зеркала — иначе половина строки приходила бы пустой. Порядок сортировки — по `coalesce(ps.updated_at, p.updated_at)`.
+3. **Смысл фильтра «без описания» изменён:** было `coalesce(ps.description_html, p.description,'')=''` — «описания нет нигде», стало `coalesce(nullif(ps.description_html,''),'')=''` — «не заполнен слой сайта». Описание из МойСклад побеждает на витрине, но работы флориста не отменяет; при прежнем условии карточка с одной складской строкой считалась готовой и из отбора выпадала.
+4. `contentRepo.ensure` заводит карточку только под существующий товар зеркала (`INSERT … SELECT FROM products`), а не под любой присланный `moyskladId`.
+
+### Типы контракта в управленке
+
+`apps/admin/src/api.ts` берёт `AdminProductRow`, `PublicCategory`, `StoreDirectoryEntry` и `StaffRole` из `@visteria/shared-types` относительным импортом (`import type`, при `verbatimModuleSyntax` стирается и в сборку Vite не попадает): зависимости управленки не трогаются без общего `pnpm install`. Второй рукописной копии этих типов нет, а совпадение проверяет сборка — `pnpm --filter @visteria/admin build` начинается с `tsc --noEmit`. Исключение одно: `ContentWrite` объявлен в управленке своим списком, потому что живёт в `apps/api/src/access` и общим пакетом типов не выставлен.
+
+Имена переменных окружения: `ADMIN_STAFF_LOGIN`, `ADMIN_STAFF_PASSWORD_HASH`, `ADMIN_STAFF_IDENTITY`, `ADMIN_SESSION_TTL_HOURS`, `ADMIN_SESSION_COOKIE_SECURE`. Значений нет нигде.
+Вход не создаёт учётную запись сотрудника: иначе пришлось бы выдумать имя. Нет строки — отказ с названной причиной, оба ручных шага описаны в README управленки.
+Предел попыток входа живёт в памяти процесса: при нескольких экземплярах бэкенда считается у каждого отдельно.
+
+## Из таска 04 — корзина (11.09.2026, ждёт ревью)
+
+Эндпойнты: `GET /cart`, `POST /cart/items`, `PATCH /cart/items/:productId`,
+`DELETE /cart/items/:productId`, `DELETE /cart`. Контракт целиком — раздел «Корзина»
+в `apps/api/README.md`; второго описания не заводить.
+
+`productId` снаружи — **идентификатор карточки сайта**, тот же, что в выдаче каталога.
+Идентификатор зеркала учёта наружу не уходит, перевод живёт в `apps/api/src/cart/controller.ts`.
+Cookie `vs_cart` несёт только идентификатор записи `carts`; срок 30 суток задан одним
+местом — `apps/api/src/cart/cookie.ts`, витрина переносит `Set-Cookie` как есть.
+`GET /cart` записи в базе не заводит.
+
+**Деньги корзины по-прежнему считаются один раз**, в `packages/db/src/cart.ts` (`PAYABLE`) —
+см. «Из таска 01». Новое здесь только одно: белый список позиции корзины `CART_LINE`
+в `apps/api/src/access/index.ts` теперь называет **`payable` рядом с `lineTotal`**.
+Список, отдающий сумму строки без оплачиваемого количества, отдаёт цифру, которую нечем
+объяснить, и первый же потребитель заводит второй счёт денег. Убирать `payable`, оставляя
+`lineTotal`, нельзя; утверждение стоит в `apps/api/test/access.test.ts`.
+
+**Предела количества у позиции ровно один — остаток.** Ни контракт, ни витрина второго
+не заводят: просьба сверх остатка не отклоняется, а ограничивается, и `message` объясняет
+это покупателю на месте. Разбор количества на витрине — `apps/web/src/app/cart/_lib/quantity.ts`,
+`parseQuantity(raw)`: только цифры, целое число, не больше безопасного целого; нечисловое
+значение даёт отказ, а не единицу. Прежний `\d{1,3}` снят 11.09.2026 — выдуманный витриной
+потолок в 999 штук отказывал молча и расходился с остатком. Функция вынесена отдельным
+модулем оттого, что `actions.ts` помечен `'use server'` и вправе экспортировать только
+асинхронные функции: утверждать разбор, живущий там, было бы нечем.
+
+**Тесты витрины** — `pnpm --filter @visteria/web test`: к `apps/web/test/html.test.ts`
+добавлен `apps/web/test/cart-quantity.test.ts`.
+
+## Остановка захода — 12.09.2026
+
+Заход остановлен по просьбе пользователя: «завершить текущую задачу, к следующей пока не приступать».
+
+**Закоммичено и зелёное** — коммит `963f5ab`, 113 тестов, ноль падений:
+управленка со служебным входом и признаком назначения сессии (миграция `0005_session_purpose.sql`),
+редактор карточки с журналом и откатом, карта сайта, правила обхода, юридические страницы с видимой
+заглушкой, белый список позиции корзины с оплачиваемым количеством.
+
+**Не закоммичено и оставлено как есть:** оформление заказа — `apps/api/src/checkout`,
+`apps/api/test/checkout.test.ts`, `apps/web/src/app/checkout`, `apps/web/test/checkout-state.test.ts`
+и правка `packages/db/src/orders.ts`. Эти файлы правит другой процесс, их тесты плавали между
+прогонами. Незаконченную чужую работу не фиксировали.
+
+**Ревью прошли:** таски 01, 02, 03, 04. **Ревью НЕ проходили:** таски 05, 06, 10 — они зелёные,
+но независимой проверки на них не было. Тот, кто продолжит, начинает с ревью этих трёх.
+
+**Не начинались:** таск 07 (опт), 08 (запись заказа в МойСклад), 09 (статусы заказа).
+
+**Осторожно, в репозитории работает не один процесс.** Коммит `4437578` зафиксировал три таска
+разом до ревью и не оркестратором; редактор карточки и правки синхронизатора появились на диске
+без запуска оркестратором. Перед продолжением сверь состояние с `git log`, а не с памятью.
