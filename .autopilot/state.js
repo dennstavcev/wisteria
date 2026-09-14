@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "CLAUDE.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-12T12:43:32+03:00",
+  "updatedAt": "2026-09-14T13:33:33+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -48,7 +48,7 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-09T21:08:15+03:00",
-      "note": "4 из 10 тасков приняты; параллельно строятся редактор карточки (05) и оформление заказа (06)"
+      "note": "Остановлено по просьбе пользователя для пересмотра процесса: 7 из 10 тасков приняты; 07 failed и не коммитить; 09 repair прерван лимитом, WIP не принят."
     },
     {
       "id": "review",
@@ -62,10 +62,10 @@ window.STATE =
   ],
   "requirements": {
     "total": 15,
-    "done": 3,
-    "inTicket": 11,
+    "done": 9,
+    "inTicket": 2,
     "inSpec": 0,
-    "placeholder": 0,
+    "placeholder": 3,
     "deferred": 1,
     "dropped": 0
   },
@@ -122,7 +122,7 @@ window.STATE =
       ],
       "status": "done",
       "retries": 1,
-      "repairs": 1,
+      "repairs": 2,
       "handoffs": 0,
       "startedAt": "2026-09-09T23:39:38+03:00",
       "note": "Принят: повторное ревью закрыло все пять условий, домен проверен машинной расшифровкой.",
@@ -151,7 +151,7 @@ window.STATE =
       ],
       "status": "done",
       "retries": 2,
-      "repairs": 1,
+      "repairs": 2,
       "handoffs": 0,
       "note": "Принят: ревью пройдено, дыра с назначением сессии закрыта миграцией 0005.",
       "startedAt": "2026-09-11T08:22:26+03:00",
@@ -225,16 +225,16 @@ window.STATE =
       ],
       "status": "done",
       "retries": 1,
-      "repairs": 1,
+      "repairs": 2,
       "handoffs": 1,
       "startedAt": "2026-09-12T12:25:25+03:00",
-      "note": "Доведён до зелёного и закоммичен. РЕВЬЮ НЕ ПРОХОДИЛ: заход остановлен по просьбе пользователя.",
-      "finishedAt": "2026-09-12T12:43:32+03:00",
-      "commit": "963f5ab",
+      "note": "Принят: manifest/spec чистые, прежние блокеры по badges/sortWeight и concurrent upload закрыты; craft-оговорки занесены в concerns.",
       "tests": {
-        "passed": 7,
+        "passed": 72,
         "failed": 0
-      }
+      },
+      "finishedAt": "2026-09-13T16:32:14+03:00",
+      "commit": "39a7217"
     },
     {
       "id": "06",
@@ -251,12 +251,18 @@ window.STATE =
         "apps/api/src/checkout",
         "apps/web/src/app/checkout"
       ],
-      "status": "in-progress",
+      "status": "done",
       "retries": 0,
       "repairs": 1,
       "handoffs": 0,
       "startedAt": "2026-09-11T18:19:19+03:00",
-      "note": "Не закоммичен: файлы правит другой процесс, тесты плавают. Оставлен как есть, чужую незаконченную работу не фиксируем."
+      "note": "Принят: оформление заказа зелёное, Manifest+Spec ревью чистое; закоммичен вместе с 05 из-за общих API/db файлов.",
+      "tests": {
+        "passed": 83,
+        "failed": 0
+      },
+      "finishedAt": "2026-09-13T16:32:14+03:00",
+      "commit": "39a7217"
     },
     {
       "id": "07",
@@ -277,11 +283,12 @@ window.STATE =
         "apps/web/src/app/opt",
         "apps/admin/src/wholesale"
       ],
-      "status": "pending",
+      "status": "failed",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 2,
       "handoffs": 0,
-      "note": "Не начинался. Заход остановлен по просьбе пользователя."
+      "startedAt": "2026-09-13T16:32:14+03:00",
+      "note": "Не принят: после двух ремонтов остались blocking — выдуманный SLA, limit/export/PDF, неатомарное approve+token. Код 07 не коммитить."
     },
     {
       "id": "08",
@@ -298,11 +305,18 @@ window.STATE =
         "apps/sync-worker/src/orders",
         "packages/moysklad-client"
       ],
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 2,
       "handoffs": 0,
-      "note": "Не начинался. Заход остановлен по просьбе пользователя."
+      "startedAt": "2026-09-13T16:32:14+03:00",
+      "note": "Принят: recovery для new, idempotency от orderNumber, без самовольного confirmed, courier note доставлен.",
+      "tests": {
+        "passed": 22,
+        "failed": 0
+      },
+      "finishedAt": "2026-09-13T20:54:35+03:00",
+      "commit": "1d8a519"
     },
     {
       "id": "09",
@@ -319,11 +333,12 @@ window.STATE =
         "apps/api/src/webhooks",
         "apps/sync-worker/src/orders"
       ],
-      "status": "pending",
+      "status": "repair",
       "retries": 0,
-      "repairs": 0,
+      "repairs": 1,
       "handoffs": 0,
-      "note": "Не начинался. Заход остановлен по просьбе пользователя."
+      "startedAt": "2026-09-13T20:54:35+03:00",
+      "note": "Остановлен на repair из-за лимитов до повторного ревью. WIP не принят и не коммитить без новой проверки: нужны реальные контракты webhooks/polling МойСклад, конфиг-маппинг статусов и атомарность обработки."
     },
     {
       "id": "10",
@@ -357,7 +372,7 @@ window.STATE =
   ],
   "singlePass": null,
   "tests": {
-    "passed": 113,
+    "passed": 123,
     "failed": 0
   },
   "debt": {
@@ -432,6 +447,10 @@ window.STATE =
     "Поиск: в оформлении заказа нет ссылки на оферту и согласие на обработку данных. Ставит её владелец оформления из общего реестра адресов.",
     "Поиск: дата изменения в карте сайта не проставлена — публичный ответ каталога её не несёт, а дата сборки на её месте ровно то, от чего предостерегает первоисточник по продвижению.",
     "Поиск: директиву Clean-param для Яндекса выразить нечем — тип карты правил такого не знает. Вместо параметров сортировки и страницы закрыт параметр смещения, расхождение названо в комментарии файла."
+    ,"Управленка: выключенный, но ранее назначенный бейдж остаётся в полном autosave-патче флориста и сервер отклоняет даже правку названия; неактивный старый бейдж не должен блокировать разрешённые поля."
+    ,"Управленка: конкурентный media-upload тест использует один PGlite executor, который последовательно исполняет транзакции; межсоединительный lock стоит подтвердить PostgreSQL multi-connection тестом или отдельным lock-швом."
+    ,"Опт: таск 07 не принят после двух ремонтов — в API, витрине и тестах остался неподтверждённый SLA «два рабочих дня», production-конфигурация минимальной партии не подключена, PDF-прайс заменяет кириллицу на `?`, выгрузка молча ограничена первой страницей, approve+token не атомарны."
+    ,"Статусы заказа: таск 09 остановлен на repair из-за лимитов. Первая версия и текущий WIP не приняты: нельзя угадывать имена статусов МойСклад, контракт webhook/polling должен соответствовать реальному API, обработка должна быть атомарной и покрывать все заказы."
   ],
   "reviewers": {
     "manifestSpec": "/root/admin_manifest_review2",

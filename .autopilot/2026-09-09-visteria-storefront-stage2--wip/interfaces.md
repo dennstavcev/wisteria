@@ -299,6 +299,47 @@ Cookie `vs_cart` несёт только идентификатор записи
 **Тесты витрины** — `pnpm --filter @visteria/web test`: к `apps/web/test/html.test.ts`
 добавлен `apps/web/test/cart-quantity.test.ts`.
 
+## Из таска 05 — управленка: карточка товара, фото, публикация, журнал (13.09.2026, код зелёный, ждёт финальное ревью)
+
+Эндпойнты карточки: `GET /admin/products/:id`, `GET /admin/products/:id/preview`,
+`PATCH /admin/products/:id`, `POST /admin/products/:id/publish`,
+`POST /admin/products/:id/archive`, `POST /admin/products/:id/restore`,
+`GET /admin/products/:id/revisions`,
+`POST /admin/products/:id/revisions/:revisionId/rollback`.
+
+Медиа карточки: `POST /admin/media?productSiteId&uploadId&filename&width&height&source&alt`,
+`PATCH /admin/products/:siteId/media/:assetId`, `DELETE /admin/products/:siteId/media/:assetId`,
+`PATCH /admin/products/:siteId/media-order`. `uploadId` обязателен и входит в `storageKey`;
+`media_asset.storage_key` уникален миграцией `0006_media_asset_storage_key_unique.sql`, поэтому
+повтор или конкурентный upload с тем же client id возвращает один asset и одну связь карточки.
+Production-хранилище берёт корень из `MEDIA_STORAGE_ROOT`, пишет через временный файл и атомарное
+переименование; тесты подставляют `MediaStorage`.
+
+Публикация не правит зеркало МойСклад и не публикует исчезнувший товар: inactive mirror снимает
+публикацию, сохраняет человеческий контент и блокирует повторную публикацию русской причиной.
+Флорист правит `card.edit`, включая `badges` и `sortWeight`, но не `slug`, SEO, снятие публикации,
+архив и rollback. CRUD бейджей (`GET/POST/PATCH/DELETE /admin/badges`) открыт менеджеру и админу;
+флорист только выбирает активные бейджи из справочника.
+
+## Из таска 06 — оформление заказа (13.09.2026, Manifest+Spec ревью чистое)
+
+Эндпойнты: `GET /checkout/options?date=YYYY-MM-DD` → `{pickup, delivery}` и
+`POST /checkout` → `{order, payment}`. Витрина: `/checkout` и `/checkout/done`.
+Поля заказа: способ `pickup|delivery`, имя, телефон, получатель, дата, интервал доставки,
+адрес доставки, комментарий, текст открытки. Отказ возвращает введённые значения и не чистит
+корзину; успешный заказ очищает корзину.
+
+Деньги берутся из `CartView.subtotal` и позиций `payable`; checkout не считает сумму вторым
+правилом. Оплата первой итерации только `on_receipt` / при получении или самовывозе, без обещаний
+звонка, подтверждения менеджером и без Сбербанка. Заказ создаётся идемпотентно: публичный номер
+заказа идёт в outbound idempotency key, внутренний repeat key основан на cart UUID.
+
+Доставка требует явного `CHECKOUT_DELIVERY_STORE_ID`; без него нельзя выбрать первый розничный
+склад. Дата строгая календарная, интервал обязателен, занятый интервал скрывается и не принимается.
+Ёмкость интервала и повторный syncId проверяются внутри транзакции с `pg_advisory_xact_lock`;
+задача записи в МойСклад ставится неблокирующе, сбой очереди оставляет сохранённый заказ в статусе
+`new` и виден только в журнале.
+
 ## Остановка захода — 12.09.2026
 
 Заход остановлен по просьбе пользователя: «завершить текущую задачу, к следующей пока не приступать».
@@ -321,3 +362,30 @@ Cookie `vs_cart` несёт только идентификатор записи
 **Осторожно, в репозитории работает не один процесс.** Коммит `4437578` зафиксировал три таска
 разом до ревью и не оркестратором; редактор карточки и правки синхронизатора появились на диске
 без запуска оркестратором. Перед продолжением сверь состояние с `git log`, а не с памятью.
+
+## Возобновление захода — 13.09.2026
+
+Таски 05 и 06 снова прогнаны после ремонта: `pnpm --filter @visteria/api test` — 72/72,
+`pnpm --filter @visteria/web test` — 11/11, общий `pnpm test` — db 23/23, MoySklad client 3/3,
+sync-worker 14/14, API 72/72. `pnpm typecheck`, `pnpm lint`, `pnpm build`,
+`pnpm --filter @visteria/web typecheck/build`, `pnpm --filter @visteria/admin typecheck/build`
+прошли. Таск 06 имеет чистое Manifest+Spec ревью; таск 05 ждёт независимое финальное ревью,
+потому что reviewer остановлен лимитом до 22:14. Коммита по 05/06 пока нет.
+
+## Из таска 08 — запись заказа в МойСклад (13.09.2026, принят, коммит `1d8a519`)
+
+`MoyskladClient` выставляет запись документов: `post<T>(path: string, body: unknown): Promise<T>`
+и `put<T>(path: string, body: unknown): Promise<T>`. Значения секретов и идентификаторов
+не зашиваются; организация берётся по имени переменной `MOYSKLAD_ORGANIZATION_ID`.
+
+`apps/sync-worker/src/orders` выставляет `OrderPush.run({orderId, orderNumber, idempotencyKey})`,
+но identity документа МойСклад (`externalCode` и имя) берёт только из сохранённого
+`orders.order_number`; произвольные поля job не создают второй документ. `post`/`put` мутации
+в клиенте МойСклад не ретраятся вслепую: повтор задания сначала ищет документ по `externalCode`.
+
+`enqueuePendingOrderPushes(db, queue, limit = 100): Promise<number>` восстанавливает сохранённые
+заказы `new` без `moysklad_order_id` и кладёт `order_push` со стабильным `jobId`. Runner вызывает
+recovery при старте и каждые `ORDER_PUSH_RECOVERY_INTERVAL_MS` (по умолчанию 180000).
+Успешный push сохраняет только `orders.moysklad_order_id`, локальный бизнес-статус не меняет:
+статусы приходят в таске 09 через webhook/polling. `courierDispatchNote` входит в описание
+нового `customerorder` и обновляет описание существующего документа через `PUT`.
