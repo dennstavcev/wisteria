@@ -89,3 +89,13 @@
 `interfaces/`; активные тикеты 07, 09 и 10 перечисляют свой минимальный набор. При продолжении
 читать `interfaces.md`, обязательный `interfaces/00-core.md` и только модули из тикета.
 `interfaces/archive-2026-09-14.md` хранит историю и в рабочий контекст не входит.
+
+## Продолжение 20.09.2026
+
+- Dirty WIP 07/09 был 15.09 снят в ветку `stage2-wip` (коммит `040c8eb`) и в stash-бэкап; master остался на `1d8a519`.
+- Таск 09 принят: свежее Manifest+Spec ревью чистое, blocking нет; код отделён от опта и
+  закоммичен на master как `87b9852`. Замечания уровня craft — в `state.js` → `concerns`.
+- `.env.example` дополнен именами `MOYSKLAD_ORGANIZATION_ID`, `ORDER_PUSH_RECOVERY_INTERVAL_MS`,
+  `MOYSKLAD_WEBHOOK_TOKEN`, `MOYSKLAD_ORDER_STATUS_MAP`, `ORDER_STATUS_POLL_INTERVAL_MS`.
+- Осталось: таск 07 (опт) — перезапуск с контракта и тестов, WIP только в `stage2-wip`;
+  таск 10 — закоммичен, но ревью не проходил. Каждый — в отдельном контексте.

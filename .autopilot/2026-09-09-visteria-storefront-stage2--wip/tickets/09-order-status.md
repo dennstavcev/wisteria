@@ -4,7 +4,7 @@
 **Blocked by:** 08
 **Зона:** `apps/api/src/webhooks`, `apps/sync-worker/src/orders`
 **Волна:** 6
-**Status:** ready
+**Status:** done — принят 20.09.2026, коммит `87b9852`
 
 ## Что должно заработать
 

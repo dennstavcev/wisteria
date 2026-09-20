@@ -13,7 +13,7 @@
 Таблица `webhook_events` уже существует. Новая таблица или колонка допустима только с
 обоснованием, почему существующей структуры не хватает.
 
-## Из таска 09 — статусы заказа (14.09.2026, review passed, commit pending)
+## Из таска 09 — статусы заказа (принят 20.09.2026, коммит `87b9852`)
 
 `POST /webhooks/moysklad?token=<MOYSKLAD_WEBHOOK_TOKEN>&requestId=<moysklad-request-id>`
 принимает реальный формат МойСклад `payload.events[].meta/action`. Токен в query — явная мера
