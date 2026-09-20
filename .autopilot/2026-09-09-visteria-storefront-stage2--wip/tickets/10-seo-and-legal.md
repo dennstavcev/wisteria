@@ -4,7 +4,7 @@
 **Blocked by:** 02
 **Зона:** `apps/web/src/app/sitemap.ts`, `apps/web/src/app/robots.ts`, `apps/web/src/app/legal`
 **Волна:** 5
-**Status:** ready
+**Status:** done — принят 20.09.2026, коммиты `963f5ab`, `843abe1`
 
 ## Что должно заработать
 

@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "AGENTS.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-20T17:57:32+03:00",
+  "updatedAt": "2026-09-20T18:14:49+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -48,7 +48,7 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-09T21:08:15+03:00",
-      "note": "Возобновлено 20.09.2026: 8 из 10 тасков приняты; 09 принят и закоммичен (87b9852). Осталось: 07 failed — перезапуск с контракта и тестов; 10 закоммичен, но ревью не проходил."
+      "note": "Возобновлено 20.09.2026: 9 из 10 тасков приняты (09 — 87b9852, 10 — 843abe1). Осталось: 07 опт — failed, перезапуск с контракта и тестов, WIP в ветке stage2-wip."
     },
     {
       "id": "review",
@@ -62,8 +62,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 15,
-    "done": 10,
-    "inTicket": 1,
+    "done": 11,
+    "inTicket": 0,
     "inSpec": 0,
     "placeholder": 3,
     "deferred": 1,
@@ -364,16 +364,20 @@ window.STATE =
       ],
       "status": "done",
       "retries": 1,
-      "repairs": 0,
+      "repairs": 1,
       "handoffs": 0,
       "startedAt": "2026-09-11T18:29:31+03:00",
-      "note": "Доведён до зелёного и закоммичен. РЕВЬЮ НЕ ПРОХОДИЛ: заход остановлен по просьбе пользователя.",
+      "note": "Принят 20.09.2026: ремонт закрыл оба блокера (ссылки подвала и оформления заказа ведут на /legal/oferta и /legal/privacy из реестра), перепроверка чистая, Craft без blocking. Web-тесты 13/13, корневые typecheck и lint зелёные.",
       "tests": {
-        "passed": 11,
+        "passed": 6,
         "failed": 0
       },
-      "finishedAt": "2026-09-12T12:43:32+03:00",
-      "commit": "963f5ab"
+      "finishedAt": "2026-09-20T18:14:49+03:00",
+      "commit": "963f5ab, 843abe1",
+      "repairFindings": [
+        "Подвал ссылается на /oferta и /privacy, страницы живут по /legal/oferta и /legal/privacy — переход из подвала должен открывать страницу с заглушкой.",
+        "На экране оформления заказа нет ссылок на оферту и обработку персональных данных; адреса должны браться из legal/routes.ts."
+      ]
     }
   ],
   "singlePass": null,
@@ -461,7 +465,16 @@ window.STATE =
     "Таск 09 · apps/api/src/app.ts (moyskladStateReader) · reader статуса импортируется по файловому пути ../../sync-worker/dist/orders/index.js без зависимости apps/api на sync-worker; без dist или без MOYSKLAD_API_TOKEN в процессе API reader = undefined и вебхуки молча ложатся в unknown (сверка догоняет). Нужна явная зависимость и предупреждение в журнале.",
     "Таск 09 · packages/db/src/order-status-map.ts (setOrderStatusFromMoysklad, processMoyskladWebhookStatus) · смена статуса сырым update — вторая версия orderRepo.setStatus из 01-orders; свести к одному пути или объяснить в контракте.",
     "Таск 09 · apps/api/src/app.ts (ApiOptions.resolveMoyskladOrderState) · четвёртый тестовый шов вопреки 00-core «швов три»; moyskladClient уже покрывает внедряемый транспорт.",
-    "Таск 09 · apps/api/src/app.ts (useBodyParser verify) · rawBody копируется для каждого JSON-запроса всех контроллеров, а нужен только вебхуку как fallback ключа без requestId."
+    "Таск 09 · apps/api/src/app.ts (useBodyParser verify) · rawBody копируется для каждого JSON-запроса всех контроллеров, а нужен только вебхуку как fallback ключа без requestId.",
+    "Таск 10 · apps/web/src/app/layout.tsx:9 · домен вистерия74.рф (punycode) захардкожен в metadataBase, не переменная окружения; при пустом metadataBase siteOrigin() отдаёт пустую строку и карта сайта становится относительной. Домен совпадает с 14_security-and-process-decisions.md §6 — не выдуман.",
+    "Таск 10 · apps/web/src/app/robots.ts:41-44 · правило /*?offset= закрывает листание только когда offset первый параметр, а адреса из catalog/_lib/query.ts ставят его после category; ни одно утверждение seo.test.ts закрытость листания не проверяет. Disallow /search и /account — маршрутов нет на Этапе 2.",
+    "Таск 10 · apps/web/src/app/sitemap.ts:54-58 · отказ бэкенда на первой странице отдаёт 200 с картой из двух адресов вместо ошибки ответа (поисковик потеряет каталог); отказ на второй странице и предел MAX_PAGES тестами не покрыты.",
+    "Таск 10 · apps/web/src/app/sitemap.ts:87, robots.ts:3 · siteOrigin через ?? \"\" молча даёт относительные адреса; robots тянет из sitemap.ts fetchCatalog и force-dynamic — адрес сайта и путь карты стоит вынести в отдельный модуль.",
+    "Таск 10 · apps/web/test/legal.test.ts:34-35, seo.test.ts:51-54 · утверждения на имена идентификаторов и подстроки исходника (DocumentPending, legalMetadata, readFile), а не на поведение страницы.",
+    "Таск 10 · apps/web/src/app/legal/oferta/page.tsx, privacy/page.tsx · два файла совпадают полностью кроме адреса — общая обёртка или маршрут [document] по реестру.",
+    "Таск 10 · apps/web/src/app/cart/page.tsx, checkout/page.tsx, checkout/done/page.tsx · есть title, нет description; страницы noindex.",
+    "Таск 10 · interfaces/00-core.md выставляет /legal, а голый /legal отдаёт 404: есть только /legal/oferta и /legal/privacy.",
+    "Локальная среда · apps/web/.next/types/app/opt/* · устаревшие сгенерированные типы удалённого маршрута /opt валят pnpm --filter @visteria/web typecheck; лечится очисткой .next, к коду не относится."
   ],
   "reviewers": {
     "manifestSpec": null,
