@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "AGENTS.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-20T18:14:49+03:00",
+  "updatedAt": "2026-09-20T18:22:07+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -48,7 +48,7 @@ window.STATE =
       "id": "build",
       "status": "active",
       "startedAt": "2026-09-09T21:08:15+03:00",
-      "note": "Возобновлено 20.09.2026: 9 из 10 тасков приняты (09 — 87b9852, 10 — 843abe1). Осталось: 07 опт — failed, перезапуск с контракта и тестов, WIP в ветке stage2-wip."
+      "note": "20.09.2026: 9 из 10 тасков приняты; таск 07 перезапущен в свежем контексте (retry 1)."
     },
     {
       "id": "review",
@@ -283,12 +283,12 @@ window.STATE =
         "apps/web/src/app/opt",
         "apps/admin/src/wholesale"
       ],
-      "status": "failed",
-      "retries": 0,
+      "status": "in-progress",
+      "retries": 1,
       "repairs": 2,
       "handoffs": 0,
-      "startedAt": "2026-09-13T16:32:14+03:00",
-      "note": "Не принят: после двух ремонтов остались blocking — выдуманный SLA, limit/export/PDF, неатомарное approve+token. Код 07 не коммитить."
+      "startedAt": "2026-09-20T18:22:07+03:00",
+      "note": "Перезапуск 20.09.2026 по решению пользователя: свежий контекст, изменённый подход (контракт и тесты первыми, SQL в packages/db, PDF с кириллическим шрифтом, атомарные approve+token, заглушки для срока ответа и минимальной партии)."
     },
     {
       "id": "08",
