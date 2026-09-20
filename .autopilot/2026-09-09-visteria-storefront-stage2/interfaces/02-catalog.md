@@ -58,3 +58,10 @@
 `apps/web/src/app/legal/routes.ts` (`LEGAL_PAGES`: `/legal/oferta`, `/legal/privacy`,
 подписи документов); подвал и форма оформления заказа берут адреса только из него. Страницы
 несут видимую заглушку «текст ещё не передан заказчиком»; голого `/legal` нет.
+
+## Из таска 12 — общий модуль витрины (21.09.2026)
+
+- `@/lib/storefront`: `API_BASE`, `CART_COOKIE`, `Loaded<T>`, `Answered<T>`, `load<T>(path, headers?)`, `cartIdentifier`, `cartCookieHeader`, `relayedCartCookie`, `parseInteger` — единственный источник для каталога, корзины, оформления и опта.
+- `@/lib/site`: `siteOrigin()`, `SITEMAP_PATH`, `pickupStreet` — микроразметка и карта сайта берут адрес отсюда, не из `site.metadataBase`.
+- Счётчик шапки каталога больше не заглушка: `availableToday(page, selection)` считает по признаку наличия только при неполной первой странице, иначе строка не показывается.
+- Юридические страницы — маршрут `/legal/[document]` по `legal/routes.ts`; `sitemap.ts` при отказе бэкенда бросает (500 карты), `robots.ts` закрывает `/*?offset=` и `/*&offset=`.

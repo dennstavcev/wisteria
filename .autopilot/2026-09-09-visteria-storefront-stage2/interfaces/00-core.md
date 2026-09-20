@@ -77,3 +77,10 @@ Docker в системе есть. `pnpm infra:up` поднимает Redis и P
 
 Не хватает зависимости — не ставь сам: верни `BLOCKED` или назови её в CONCERNS,
 общий install запускает оркестратор одним процессом. Коммиты делает оркестратор после ревью.
+
+## Из таска 11 — контролируемые ошибки (21.09.2026)
+
+- Кодов ошибок семь: добавлен `not_configured` (503) — `POST /webhooks/moysklad` без `MOYSKLAD_WEBHOOK_TOKEN`.
+- Правило ИНН одно: `@visteria/shared-types` → `INN_PATTERN`, `isInn(raw)`, `normalizeInn(raw)`; используют API, серверное действие и форма `/opt`.
+- `apps/api` зависит от `@visteria/sync-worker` (`exports` `.` и `./orders`) ради reader-а статусов; `GET /wholesale/price` без поля `exports`.
+- `ensure` → 404 на неизвестный `moyskladId`; корзина: `quantity` > int4 → 400 `invalid_query`; ранее назначенный неактивный бейдж не блокирует патч карточки.

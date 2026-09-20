@@ -9,6 +9,8 @@
 | 07 — опт | `01-wholesale.md`, `01-access-control.md`, `03-session-purpose.md` |
 | 09 — статусы заказа | `01-orders.md`, `06-checkout.md`, `08-order-push.md` |
 | 10 — SEO и юридические страницы | `02-catalog.md` |
+| 11 — бэкенд: контролируемые ошибки | `01-orders.md`, `01-wholesale.md`, `03-session-purpose.md`, `04-cart.md`, `05-product-editor.md` |
+| 12 — витрина: один источник | `02-catalog.md`, `04-cart.md`, `06-checkout.md` |
 
 Завершённые подсистемы лежат отдельными файлами в `interfaces/`: каталог, управленка, корзина, редактор товара, checkout и запись заказа в МойСклад. Их контракт открывается только при прямой зависимости текущей задачи.
 
