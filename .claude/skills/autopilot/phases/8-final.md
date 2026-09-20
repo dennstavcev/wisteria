@@ -86,10 +86,10 @@ At tier T0 there was one context and no tickets, so `concerns` is short and this
 | Agent | Question | Receives | Never receives |
 |---|---|---|---|
 | blind checker | что из брифа сделано | the brief, the repo | `spec.md`, `manifest.md`, tickets |
-| memory | как этим пользоваться завтра | the repo, `interfaces.md`, the memory file, the tier | `spec.md`, tickets |
+| memory | как этим пользоваться завтра | the repo, interface router and all current modules, the memory file, the tier | `spec.md`, tickets |
 | ADR *(tier T2+)* | почему сделано именно так | `spec.md`, `manifest.md` | the repo — it documents decisions, not code |
 
-The memory agent writes the full description of the project into `CLAUDE.md` or `AGENTS.md` — architecture, key files, conventions, environment, tests, gotchas — scaled to the tier, folding in what `interfaces.md` accumulated. Like the blind checker, **it does not receive `spec.md` or the tickets**: a memory written from the plan documents intentions, and the next session has no way to tell the difference.
+The memory agent writes a compact router into `CLAUDE.md` or `AGENTS.md` and puts subsystem detail under `docs/agent-context/` when needed — architecture, key files, conventions, environment, tests, gotchas — scaled to the tier, folding in what the interface modules accumulated. Like the blind checker, **it does not receive `spec.md` or the tickets**: a memory written from the plan documents intentions, and the next session has no way to tell the difference.
 
 The ADR agent is the mirror image and that is why it cannot be the same one. **`spec.md` dies with the run**, and with it every «почему так» in it — the reason for the data model, what the build proved wrong at ticket four, which word the project uses for which thing. Six months later the next session reads working code and no reason for any of it, and re-opens decisions that were settled here. At tier T2+ that is worth three files in `docs/adr/`; below it, the memory file carries what little there is.
 

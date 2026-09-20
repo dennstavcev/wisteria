@@ -8,16 +8,16 @@ The repo needs a file that tells the **next** session what this project is — `
 
 | Check | File |
 |---|---|
-| `CLAUDE.md` already exists | `CLAUDE.md` |
-| `AGENTS.md` already exists | `AGENTS.md` |
-| both exist | the one that already holds the project description; if neither does, `AGENTS.md` — and **leave the other file alone** |
+| both exist | if one is a one-line pointer, use its target; otherwise use the one that already holds the project description; if neither does, `AGENTS.md` |
+| only `CLAUDE.md` exists | `CLAUDE.md` |
+| only `AGENTS.md` exists | `AGENTS.md` |
 | `.claude/` directory, or `$CLAUDECODE` / `$CLAUDE_CODE_ENTRYPOINT` is set | `CLAUDE.md` |
 | `.cursor/` directory | `AGENTS.md` |
 | `.codex/` directory, or `.github/copilot-instructions.md` | `AGENTS.md` |
 | nothing matched | `AGENTS.md` as the real file **+ `CLAUDE.md` containing one line: `См. @AGENTS.md`** |
 
 - **An existing file always wins over detection.** The repo has already answered the question; asking it again is how you end up with two half-filled memory files.
-- **The pointer file is written only in the fallback case.** When the agent was identified, one file is enough — a second file is a second thing to keep in sync, and it will not be kept in sync.
+- **Never maintain two copies.** If both tools need entry files, one holds the compact memory and the other is a one-line pointer to it.
 - **Never duplicate the text into both files.** Two copies of a project description drift within one run.
 - Record the choice in `state.js` as `memoryFile`, so a resume does not re-derive it.
 

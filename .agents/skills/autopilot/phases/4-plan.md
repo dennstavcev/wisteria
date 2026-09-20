@@ -81,9 +81,9 @@ If a wave genuinely has to change, that is a re-cut and it follows the rules for
 
 Write `wave` into every ticket file and into `state.js`. The dashboard groups the build by waves and marks the parallel ones («Волна 3 — 2 таска параллельно»); Phase 5 launches each wave in one go.
 
-## Seeding interfaces.md — before any ticket flies
+## Seeding the interface set — before any ticket flies
 
-Phase 3 decided the boundaries: what each unit owns, what it exposes, what it hides. **Copy that section into `interfaces.md` now**, under «Границы, решённые в спецификации», together with the project rules a subagent cannot derive — stack and versions, the run and test commands, what must not be touched, and the rule that a missing dependency comes back as `BLOCKED` rather than an install.
+Phase 3 decided the boundaries: what each unit owns, what it exposes, what it hides. For T0–T1, copy that section into a compact `interfaces.md`. For T2–T3, create a short `interfaces.md` router, put shared boundaries and non-derivable project rules in `interfaces/00-core.md`, and create one module per independent subsystem. Every ticket names its required modules under «Контекст интерфейсов». A missing dependency still comes back as `BLOCKED` rather than an install.
 
 This is a copy, not a design exercise. If it turns into one, Phase 3 left the boundaries undecided and the right move is to go back and decide them — not to invent them here, where the plan is already cut around them.
 
@@ -137,6 +137,10 @@ Every ticket file:
 
 Истории 1–5, Решения §2 и §4, Швы §1.
 
+## Контекст интерфейсов
+
+`interfaces/00-core.md`, `interfaces/intake.md`. Остальные модули не читать.
+
 ## Критерии приёмки
 
 - [ ] Диалог из трёх шагов доходит до подтверждения
@@ -156,7 +160,7 @@ Avoid file paths and code snippets: they go stale faster than the ticket does. T
 
 **Backward:** every ticket names at least one requirement, or a spec decision that itself traces to one. **A ticket tracing to nothing is work nobody ordered** — cut it, or attach it to what it actually serves. This direction catches the invented subsystem that would otherwise consume three contexts and confuse the acceptance run.
 
-**Complete:** every ticket has a zone and a wave, no two tickets in one wave share a zone, and **`interfaces.md` already carries the boundaries from the spec**. A missing wave means Phase 5 has to guess the order, and it will guess "one at a time"; an empty `interfaces.md` means the first subagent guesses the architecture.
+**Complete:** every ticket has a zone and a wave, no two tickets in one wave share a zone, and **the interface router plus its core/modules already carry the boundaries from the spec**. A missing wave means Phase 5 has to guess the order, and it will guess "one at a time"; an empty interface set means the first subagent guesses the architecture.
 
 Then update the manifest: `in-spec` → `in-ticket`, with the ticket number, and publish the tickets to the instruments (above).
 

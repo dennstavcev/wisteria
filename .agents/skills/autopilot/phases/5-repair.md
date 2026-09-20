@@ -21,7 +21,7 @@ A ticket comes back imperfect in two very different ways, and telling them apart
 | You send | the acceptance criterion, and nothing else | the ticket again, the error, the failing test named, the path now spelled out |
 | Because | it holds why the code is the way it is; a cold reader repairs the symptom and breaks the reason | its context *is* the failure — it is stuck in its own groove, and the same request gets the same answer |
 
-**A дозапрос costs one line.** Do not resend `interfaces.md`, the spec sections or the testing contract — it has seen all three. Send the condition:
+**A дозапрос costs one line.** Do not resend the interface router/modules, the spec sections or the testing contract — it has seen them. Send the condition:
 
 ```
 Тест `parses empty address` красный:

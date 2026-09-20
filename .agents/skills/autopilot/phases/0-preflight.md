@@ -59,7 +59,8 @@ Read what is already here; assume nothing:
 │   ├── manifest.md
 │   ├── reference.md        (only if the briefing collects one — `phases/2-briefing.md`)
 │   ├── spec.md
-│   ├── interfaces.md
+│   ├── interfaces.md       (router on T2–T3)
+│   ├── interfaces/         (core and subsystem modules on T2–T3)
 │   └── tickets/
 ├── README.md
 ├── state.js
@@ -154,7 +155,7 @@ Leaving any phase means the same two marks, here and everywhere after: the stage
 
 `.autopilot/state.js` exists with `finishedAt` still `null` → this is a resume, not a new flight. (A run that finished is the third case at the top of this file, not this one — and at tier T0 there are no tickets to be unfinished, so `finishedAt` is the only reliable test.)
 
-1. Read the project memory file first (`memoryFile` in `state.js` — `CLAUDE.md` or `AGENTS.md`), then `state.js`, `manifest.md`, `interfaces.md`. Do **not** re-read the whole dialogue; the files are the memory. The brief is `<dir>/*-brief.md` — `dir` from `state.js`, and the newest brief inside it if there is more than one.
+1. Read the project memory file first (`memoryFile` in `state.js` — `CLAUDE.md` or `AGENTS.md`), then `state.js`. Read only active rows of `manifest.md`, then the `interfaces.md` router and modules named by the active ticket. Do **not** open all completed tickets, all interface modules, or re-read the whole dialogue. The brief is `<dir>/*-brief.md` — `dir` from `state.js`, and the newest brief inside it if there is more than one.
 2. Tell the user in one line where things stand: «Продолжаю: 7 из 12 тасков готовы, следующий — корзина».
    **Re-open the dashboard — always**, which means running **both** §1 and §3 of `phases/0-instruments.md`, not only the second: §1 is what puts `index.html` beside the dashboard, and a `.autopilot/` created before 2026-08-19 does not have one, so the pane lands on a directory listing exactly as it used to. A tab does not outlive the session that opened it, so on a resume there is never a window to preserve; assuming there is leaves the user watching nothing for the rest of the run. What *is* conditional is the server: the content check in `phases/0-instruments.md` §3 reuses the port when the interrupted session left a server on **this** directory, and raises a new one when it did not. Then point the pane at it and say the address, exactly as on a first flight.
 3. A ticket marked `in-progress` in `state.js` with no commit behind it was interrupted mid-flight. Reset it to `pending` and run it again from scratch — a half-applied ticket is worse than a fresh one.

@@ -7,8 +7,9 @@ Four files describe this project and they are not interchangeable. Confusing the
 | File | Question it answers | Lifetime |
 |---|---|---|
 | `.autopilot/<dir>/` | what was promised and what was delivered **in this run** | forever, but it is history |
-| `.autopilot/<dir>/interfaces.md` | what the previous tickets built, for the tickets still to come | **dies with the run** |
-| `CLAUDE.md` / `AGENTS.md` | what an agent needs to work in this repo **tomorrow** | forever, and it is the present tense |
+| `.autopilot/<dir>/interfaces.md` + `interfaces/` | router and subsystem contracts for tickets still to come | **dies with the run** |
+| `CLAUDE.md` / `AGENTS.md` | compact routes and invariants needed in every task **tomorrow** | forever, and it is the present tense |
+| `docs/agent-context/` | subsystem detail loaded only for a matching task | forever, and it is the present tense |
 | `docs/adr/` | **why** it is the way it is, and what was considered instead | forever, and it is past tense on purpose |
 
 The last two are what this file is about. Everything in the memory file must be true of the repository *as it stands* — not of the plan, not of the run that produced it. Everything in an ADR is true of the moment it was decided, and stays written even when it is later reversed; that is what makes it a record rather than a second, staler copy of the memory file.
@@ -31,7 +32,7 @@ If the markers are missing on a later run but Autopilot's sections are recognisa
 
 ## Moment 2 — during the build
 
-Append only **facts that were discovered and cost something to discover**. One line each, no rewrite of the file:
+Append only **facts that were discovered and cost something to discover**. One line each, no rewrite of the file. If a fact belongs to one subsystem, append it to that subsystem's file under `docs/agent-context/`, not to the always-loaded root:
 
 - the real test command, once it is known — and how to run a single file;
 - a gotcha that ate time: an ordering dependency, a version pin, a platform quirk;
@@ -44,7 +45,7 @@ That is the whole list. What must **not** go in, from the CLAUDE.md quality rule
 - restatements of the obvious («класс `UserService` работает с пользователями») — the name already said it;
 - one-off fixes and commit-by-commit history — that is what `.autopilot/` and git are for;
 - long explanations of a standard technology — a link or one clause, never a paragraph;
-- anything that duplicates `interfaces.md` while the run is still going. Interfaces are folded in **once**, at the end.
+- anything that duplicates the interface set while the run is still going. Interfaces are folded in **once**, at the end.
 
 If nothing was discovered during a ticket, nothing is written. Most tickets write nothing, and that is the correct rate.
 
@@ -54,7 +55,7 @@ Now the code exists, so now the architecture can be described from the code inst
 
 **Spawn a subagent.** It runs in parallel with the blind-acceptance agent — they read the same finished repo and never see each other's output.
 
-It receives: the repository, the current memory file, `interfaces.md`, the tier, and the commands to run and test the project.
+It receives: the repository, the current memory file, the interface router and all current modules, the tier, and the commands to run and test the project.
 
 **It must not receive `spec.md` or the tickets.** A memory written from the spec documents intentions; the next session trusts it and gets lied to by a file whose whole job is to be trusted. Same reasoning as the blind acceptance — different purpose, identical mechanism.
 
@@ -93,9 +94,11 @@ The file scales with the project, exactly like the ticket tiers do.
 | Окружение | имена переменных и зачем каждая — **никогда значения** |
 | Тесты | чем и как; где лежат; как гонять один файл |
 
-### Folding in interfaces.md
+### Folding in the interface set
 
-`interfaces.md` is a working contract between tickets, and its life ends with the run. Its durable content — public signatures, schemas, event formats, module ownership — becomes the Архитектура and Ключевые файлы sections. What does not survive: the per-ticket framing («Из таска 03…»), anything already obvious from the code, and any instruction addressed to a subagent.
+The router and `interfaces/` modules are working contracts between tickets, and their life ends with the run. Durable content — public signatures, schemas, event formats, module ownership — becomes task-routed files under `docs/agent-context/`. The root memory keeps only the route and invariants that truly apply to every task. What does not survive: the per-ticket framing («Из таска 03…»), anything already obvious from the code, and any instruction addressed to a subagent.
+
+For T2–T3, keep the root memory under roughly 6 KB. If the useful material does not fit, split by subsystem and link each file from a one-line route. A large root file is charged to every task; a routed file is charged only to the task that needs it.
 
 The file itself stays in `.autopilot/<dir>/` as the run's record. It is not deleted and it is not maintained.
 

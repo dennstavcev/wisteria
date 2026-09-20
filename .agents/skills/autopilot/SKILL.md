@@ -28,7 +28,7 @@ This file is the orchestrator: modes, phase order, gates. The rules for each pha
 
 **Twice only where the table says twice** — `7-instruments.md` in Phase 4, `9-memory.md` in Phases 5 and 8, legitimate there because the run has usually been compacted in between. Everywhere else, re-reading because «details have faded» buys a copy of what is still in the context.
 
-**After a compaction, re-read the state, not the phases.** `state.js` (it holds `skillDir`, the reviewers and the tickets), `manifest.md`, `interfaces.md`, and the file of the phase you are actually in — those four and nothing else. The pull is to reopen `5-subagents.md` to recover the thread; that spends eight thousand tokens re-reading rules you are already executing, and the thread was never in them.
+**After a compaction, re-read the state, not the phases.** Read `state.js` (it holds `skillDir`, the reviewers and the tickets), only the active rows of `manifest.md`, the `interfaces.md` router plus modules named by the active ticket, and the file of the phase you are actually in. Do not reopen completed tickets or every interface module. The pull is to reopen `5-subagents.md` to recover the thread; that spends eight thousand tokens re-reading rules you are already executing, and the thread was never in them.
 
 | Phase | Read | Produces |
 |---|---|---|
@@ -36,8 +36,8 @@ This file is the orchestrator: modes, phase order, gates. The rules for each pha
 | 1 Manifest | `phases/1-manifest.md` | `brief.md`, `manifest.md` |
 | 2 Briefing | `phases/2-briefing.md` | answers recorded into the manifest |
 | 3 Spec | `phases/3-spec.md` | `spec.md` |
-| 4 Plan | `phases/4-plan.md` | `tickets/NN-*.md` (or none — see tiers), `interfaces.md` seeded |
-| 5 Subagents | `phases/5-subagents.md` | code, commits, `interfaces.md` grown |
+| 4 Plan | `phases/4-plan.md` | `tickets/NN-*.md` (or none — see tiers), interface router and modules seeded |
+| 5 Subagents | `phases/5-subagents.md` | code, commits, relevant interface modules grown |
 | 6 Review | `phases/6-review.md` | per-ticket review |
 | 7 Instruments | `phases/7-instruments.md` — **in Phase 4**, when the tickets are cut | `state.js`, `dashboard.html` + `index.html` (opened for the user) |
 | 8 Final | `phases/8-final.md` | blind acceptance, final report |
@@ -138,7 +138,8 @@ Credentials are the user's to hold, not the agent's to handle. This section bind
 │   ├── manifest.md      R01…Rnn — requirements and their status
 │   ├── reference.md     what the result should be like — the user's comparables, never yours
 │   ├── spec.md          the specification
-│   ├── interfaces.md    the boundaries from the spec, then what finished tickets built
+│   ├── interfaces.md    compact router for shared contracts
+│   ├── interfaces/      core plus subsystem modules selected by each ticket
 │   ├── handoff-NN-1.md  only when a ticket outgrew one context — what the successor needs
 │   └── tickets/NN-<slug>.md
 ├── README.md            how to read this folder, and the register of runs — for the human:

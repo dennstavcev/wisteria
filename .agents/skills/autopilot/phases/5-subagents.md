@@ -50,7 +50,8 @@ So the material never reaches you. What reaches you is a verdict, a list of name
 
 | | |
 |---|---|
-| `interfaces.md` | by path — the boundaries from the spec, plus what previous tickets built; read in full, first |
+| `interfaces.md` | by path — read the router in full first; it points to the mandatory core and the ticket-specific contract modules |
+| interface modules named by the ticket | by path — read only these modules, never the whole directory or an archive |
 | its ticket | **by path only.** The ticket file already contains the verbatim brief quotes; sending the body as well means the run pays for the same words twice |
 | the spec sections its ticket names | by path **and section headings** — `spec.md`, разделы «Приём заявки», «Валидация». Not the whole spec, and not the sections pasted: naming them is what keeps the executor out of the rest of the document |
 | the test command and how to run one file | so it does not have to derive them |
@@ -60,7 +61,7 @@ So the material never reaches you. What reaches you is a verdict, a list of name
 | the return contract | the block below, as a requirement, not a suggestion |
 | the paths to `handoff-<NN>-*.md` | **only when continuing a handed-off ticket** — all of them, oldest first, as paths, never pasted |
 
-**Paths, not contents — for everything on this list that lives in a file.** The ticket, the spec sections, `interfaces.md`, a handoff: a subagent has a filesystem and can read. Pasting the material instead writes it twice into the run's bill — once as your output, then on every subsequent turn of your own context, which is the one that is never refreshed. The exceptions are the two verbatim blocks above, which exist nowhere the executor can reach, and any harness where a subagent genuinely cannot open a file.
+**Paths, not contents — for everything on this list that lives in a file.** The ticket, the spec sections, the interface router and its selected modules, a handoff: a subagent has a filesystem and can read. Pasting the material instead writes it twice into the run's bill — once as your output, then on every subsequent turn of your own context, which is the one that is never refreshed. The exceptions are the two verbatim blocks above, which exist nowhere the executor can reach, and any harness where a subagent genuinely cannot open a file.
 
 **This is a rule about executors, and it does not reach the blind checks.** G2 and G4 work because a subagent has *not seen* the spec — and «can read» cuts both ways: `.autopilot/` is committed and sits in the repository the checker is pointed at, so not sending a file is no longer the same as withholding it. A blind check therefore needs the prohibition stated to it, not merely honoured by you: **«не открывай `.autopilot/` — ни спецификацию, ни манифест, ни таски»**, in its own prompt (`phases/3-spec.md`, `phases/8-final.md`). Independence you can only observe is independence you have already lost.
 
@@ -80,11 +81,13 @@ What you still decide, and what does not fit in a shared file:
 
 **A green suite is evidence only if the tests could have been red**, and that is not checkable from a pass count. Your part is two moves: see that the file's path went down with the executor, and treat what the Craft reviewer finds about the tests as a finding of kind *silent narrowing*, fixed in this ticket if it is blocking. A bad test is worse than a missing one — the missing one is visible.
 
-## interfaces.md — the shared contract
+## interfaces.md — the shared-contract router
 
-The file that keeps eight independent contexts building one coherent project instead of eight incompatible halves. Without it, ticket 06 invents a second version of what ticket 03 already built, and nobody notices until the end.
+The router and its modules keep independent contexts building one coherent project instead of incompatible halves. Without them, ticket 06 invents a second version of what ticket 03 already built, and nobody notices until the end.
 
-Created in Phase 0, **seeded in Phase 4 from the spec's boundaries** — so the first subagent already reads the module map instead of inventing it. **You** — the orchestrator — append to it after each ticket returns, from that ticket's contract block. Subagents never write to it: parallel writers would collide, and a subagent cannot know what the others produced.
+Created in Phase 0 and **seeded in Phase 4 from the spec's boundaries**. For T0–T1, one compact `interfaces.md` is enough. For T2–T3, or once unrelated subsystems make the file exceed roughly 12 KB, `interfaces.md` becomes a short router and details move to `interfaces/00-core.md` plus one module per subsystem. Every ticket gets an explicit «Контекст интерфейсов» list. The executor reads the router, the core, and only that list.
+
+**You** — the orchestrator — update the appropriate module after each ticket returns, from its contract block, and add only a route line to `interfaces.md` when a new module appears. Subagents never write these files: parallel writers would collide, and a subagent cannot know what the others produced. Completed-run snapshots may be archived, but archives are never executor input.
 
 ```markdown
 # Что уже построено
@@ -115,7 +118,7 @@ Created in Phase 0, **seeded in Phase 4 from the spec's boundaries** — so the 
 - Валидация телефона — `validatePhone(raw) -> {ok, normalized}`, не пиши свою
 ```
 
-Keep it to interfaces and rules. It is not a log — the log is `state.js`.
+Keep both router and modules to interfaces and rules. They are not a log — the log is `state.js`. Never make every executor pay for unrelated completed subsystems merely because their contracts share one run.
 
 ## The return contract
 
@@ -179,7 +182,7 @@ In this order, every time:
 
 1. **Read the contract block.** No block → the ticket is not finished; ask the subagent for it. A block longer than the limit it was given is not read either: ask for it again in one line, because an essay you skim once you then re-read on every remaining turn of the run.
    **`HANDOFF` takes a different path — steps 5, 1 and 2 only:** run the full suite yourself (step 5) to confirm the tree really is green, append whatever interfaces were declared, bump `handoffs` in `state.js`, and launch the successor with the handoff paths. No review, no commit, no user line, and the ticket stays `in-progress`. The ticket is mid-flight: a third of a ticket has nothing a reviewer can judge against acceptance criteria, and its review happens once, on the whole diff, when the last context returns `DONE`.
-2. **Append to `interfaces.md`.**
+2. **Update the relevant interface module** (or the compact `interfaces.md` on T0–T1).
 3. **Update the manifest** — `in-ticket` → `done` or `placeholder`, commit noted.
 4. **Send the diff to review** — the ticket goes to `review` in `state.js` first, then the Phase 6 checklist runs, by someone who did not write the code (`phases/6-review.md`). What comes back to you is a verdict and a list of findings. The diff itself does not.
 5. **Run the full test suite**, not just the ticket's own tests — and truncate the output: `<тестовая команда> 2>&1 | tail -30`. You need two things from it, green-or-red and the names of what failed, and both survive the truncation; the other two hundred lines are pure leak. A regression introduced now costs minutes; found eight tickets later it costs the evening.
@@ -198,7 +201,7 @@ Steps 4 through 6 are where the run is usually lost. Done as written, one ticket
 
 **Step 4 is sent in the same breath as the launch, not at your convenience.** «Отправлю на ревью, как разгребу» costs twice over: the ticket sits finished-but-uncommitted while its dependents wait, and the reviewer you are keeping alive (`phases/6-review.md`) goes cold — woken after forty minutes it rebuilds its whole prefix at write prices instead of read prices. Measured on the run behind this section: the two reviewers were busy six percent of their lives and paid four to seven times the orchestrator's rate for the privilege of waiting.
 
-So the front of the list is: **launch the next ticket, append `interfaces.md`, send the review** — and the manifest, the instruments and the user's line come after. Appending stays ahead of the review because `interfaces.md` is «the only way Reinvention is visible» (`phases/6-review.md`), and from the second ticket onward the reviewer is sent only what the file has grown since: send the review first and it judges this ticket against a map that does not contain it.
+So the front of the list is: **launch the next ticket, update its interface module, send the review** — and the manifest, the instruments and the user's line come after. The contract update stays ahead of the review because the interface set is «the only way Reinvention is visible» (`phases/6-review.md`); send the review first and it judges this ticket against a map that does not contain it.
 
 What this does not buy is a shortcut: the ticket is still committed only after its review and a green suite. Nothing lands unreviewed because something else was in flight; the review simply stopped being the thing everyone waits for. The one ordering that stays strict is a ticket whose dependents are pending — do not launch a dependent on an unreviewed parent, because a finding there invalidates the ground the dependent is standing on.
 
@@ -208,7 +211,7 @@ Process them **one at a time, each through the whole list above**. Two returns a
 
 - **One commit per ticket, always.** A shared commit takes away a rollback point the user paid for, and blames two tickets for one regression.
 - **Run the full suite after each**, not once after both. Otherwise a red test has two possible authors and you have to bisect what you could simply have known.
-- **`interfaces.md` is appended by you, in return order**, one block per ticket. Subagents never write to it — parallel writers collide.
+- **The relevant interface module is updated by you, in return order**, one block per ticket. Subagents never write it — parallel writers collide.
 - **Two returns claiming the same interface is a plan defect, not a merge problem.** It means the zones overlapped: keep the one that fits `interfaces.md`, and re-cut the other rather than reconciling two versions of the same thing by hand.
 
 ## Testing — who checks that the tests are worth anything

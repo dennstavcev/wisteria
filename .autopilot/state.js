@@ -8,10 +8,10 @@ window.STATE =
   "polish": null,
   "tier": "T3",
   "briefFile": "2026-09-09-brief.md",
-  "memoryFile": "CLAUDE.md",
+  "memoryFile": "AGENTS.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-14T13:33:33+03:00",
+  "updatedAt": "2026-09-14T14:45:00+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -333,12 +333,12 @@ window.STATE =
         "apps/api/src/webhooks",
         "apps/sync-worker/src/orders"
       ],
-      "status": "repair",
+      "status": "review",
       "retries": 0,
-      "repairs": 1,
-      "handoffs": 0,
+      "repairs": 2,
+      "handoffs": 1,
       "startedAt": "2026-09-13T20:54:35+03:00",
-      "note": "Остановлен на repair из-за лимитов до повторного ревью. WIP не принят и не коммитить без новой проверки: нужны реальные контракты webhooks/polling МойСклад, конфиг-маппинг статусов и атомарность обработки."
+      "note": "Код таска 09 прошёл craft review без blocking и полный `pnpm test`; коммит отложен, потому что `apps/api/src/app.ts` смешивает принятый webhook 09 с проваленным WIP 07 wholesale и требует аккуратного hunk-staging."
     },
     {
       "id": "10",
