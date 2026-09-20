@@ -4,7 +4,7 @@
 **Blocked by:** 02, 05
 **Зона:** `apps/api/src/wholesale`, `apps/web/src/app/opt`, `apps/admin/src/wholesale`
 **Волна:** 4
-**Status:** in-progress — перезапуск 20.09.2026 в свежем контексте с изменённым подходом (retry 1 после двух ремонтов)
+**Status:** done — принят 20.09.2026 с третьего захода, коммит `2e1f4b2`
 
 ## Что должно заработать
 

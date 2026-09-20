@@ -13,7 +13,7 @@
 | `apps/api` — `catalog` | публичное чтение каталога | `GET /catalog/products`, `GET /catalog/products/:slug`, `GET /catalog/categories` | белый список полей |
 | `apps/api` — `cart` | корзина и её правила | `GET/POST/PATCH/DELETE /cart` | привязку к cookie, пересчёт сумм |
 | `apps/api` — `checkout` | создание заказа | `POST /checkout` | валидацию, идемпотентность, постановку в очередь |
-| `apps/api` — `wholesale` | заявки и доступ опта | `POST /wholesale/request`, `GET /wholesale/price`, `POST /admin/wholesale/:id/decision` | выдачу и проверку ссылки |
+| `apps/api` — `wholesale` | заявки и доступ опта | `POST /wholesale/request`, `GET /wholesale/price`, `GET /wholesale/price.xlsx`, `GET /wholesale/price.pdf`, `GET /admin/wholesale`, `POST /admin/wholesale/:id/decision` (выгрузки и список добавлены таском 07, 20.09.2026) | выдачу и проверку ссылки |
 | `apps/api` — `admin` | управление карточкой и медиа | `GET/PATCH /admin/products`, `POST /admin/media`, `POST /admin/products/:id/publish`, `GET /admin/products/:id/revisions` | правило приоритета полей, запись ревизий |
 | `apps/api` — `webhooks` | приём событий МойСклад | `POST /webhooks/moysklad` | идемпотентность, проверку подлинности |
 | `apps/api` — `access` | роли и сериализация | `requireRole()`, `serialize(entity, role)` | белые списки полей по ролям |

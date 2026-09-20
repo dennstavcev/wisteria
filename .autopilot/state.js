@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "AGENTS.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-20T18:22:07+03:00",
+  "updatedAt": "2026-09-20T19:10:40+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -46,14 +46,17 @@ window.STATE =
     },
     {
       "id": "build",
-      "status": "active",
+      "status": "done",
       "startedAt": "2026-09-09T21:08:15+03:00",
-      "note": "20.09.2026: 9 из 10 тасков приняты; таск 07 перезапущен в свежем контексте (retry 1)."
+      "note": "Все 10 тасков приняты и закоммичены; 07 принят с третьего захода 20.09.2026 (2e1f4b2).",
+      "finishedAt": "2026-09-20T19:10:40+03:00"
     },
     {
       "id": "review",
-      "status": "active",
-      "startedAt": "2026-09-09T23:39:38+03:00"
+      "status": "done",
+      "startedAt": "2026-09-09T23:39:38+03:00",
+      "finishedAt": "2026-09-20T19:10:40+03:00",
+      "note": "Ревью всех тикетов пройдено; 14.09 и 20.09 ревьюеры — свежие контексты, находки в concerns."
     },
     {
       "id": "final",
@@ -62,10 +65,10 @@ window.STATE =
   ],
   "requirements": {
     "total": 15,
-    "done": 11,
+    "done": 14,
     "inTicket": 0,
     "inSpec": 0,
-    "placeholder": 3,
+    "placeholder": 0,
     "deferred": 1,
     "dropped": 0
   },
@@ -283,12 +286,18 @@ window.STATE =
         "apps/web/src/app/opt",
         "apps/admin/src/wholesale"
       ],
-      "status": "in-progress",
+      "status": "done",
       "retries": 1,
       "repairs": 2,
       "handoffs": 0,
       "startedAt": "2026-09-20T18:22:07+03:00",
-      "note": "Перезапуск 20.09.2026 по решению пользователя: свежий контекст, изменённый подход (контракт и тесты первыми, SQL в packages/db, PDF с кириллическим шрифтом, атомарные approve+token, заглушки для срока ответа и минимальной партии)."
+      "note": "Принят 20.09.2026 с третьего захода: Manifest R01.7i/8i/9i done, условия A–F закрыты тестами, Spec и Craft без blocking, дозапрос на три правки закрыт и перепроверен. Срок ответа и минимальная партия — видимые заглушки по решению пользователя.",
+      "tests": {
+        "passed": 13,
+        "failed": 0
+      },
+      "commit": "2e1f4b2",
+      "finishedAt": "2026-09-20T19:10:40+03:00"
     },
     {
       "id": "08",
@@ -474,7 +483,16 @@ window.STATE =
     "Таск 10 · apps/web/src/app/legal/oferta/page.tsx, privacy/page.tsx · два файла совпадают полностью кроме адреса — общая обёртка или маршрут [document] по реестру.",
     "Таск 10 · apps/web/src/app/cart/page.tsx, checkout/page.tsx, checkout/done/page.tsx · есть title, нет description; страницы noindex.",
     "Таск 10 · interfaces/00-core.md выставляет /legal, а голый /legal отдаёт 404: есть только /legal/oferta и /legal/privacy.",
-    "Локальная среда · apps/web/.next/types/app/opt/* · устаревшие сгенерированные типы удалённого маршрута /opt валят pnpm --filter @visteria/web typecheck; лечится очисткой .next, к коду не относится."
+    "Локальная среда · apps/web/.next/types/app/opt/* · устаревшие сгенерированные типы удалённого маршрута /opt валят pnpm --filter @visteria/web typecheck; лечится очисткой .next, к коду не относится.",
+    "Таск 07 · apps/web/src/components/site/site-header.tsx · ссылки на /opt в навигации витрины нет, раздел доступен только по адресу; шапка — зона дизайн-трека главной, решение за пользователем.",
+    "Таск 07 · packages/db/src/wholesale.ts:13 · константа PRICE копирует проекцию PUBLIC_FIELDS из catalog.ts целиком плюс одна колонка; новое публичное поле разойдётся между каталогом и прайсом.",
+    "Таск 07 · apps/api/src/wholesale/controller.ts:108 · поле exports в JSON отдаёт пути API с сырым токеном, которые витрина не читает (строит свои /opt/price/…): либо витрина потребляет exports, либо поля нет.",
+    "Таск 07 · apps/api/src/wholesale/controller.ts:16,156 · WholesaleTransaction дублирует CheckoutTransaction по форме; actor() — посредник в одну строку до runtime.staffAuth.",
+    "Таск 07 · apps/web/src/app/opt/actions.ts:36, controller.ts:176, request-form.tsx:48 · правило ИНН существует в трёх несогласованных вариантах (pattern допускает 11 цифр); нужно одно правило.",
+    "Таск 07 · apps/web/src/app/opt/_lib/api.ts:5,33 · четвёртая копия BASE и вторая копия Loaded<T> из catalog/_lib/api.ts.",
+    "Таск 07 · apps/api/src/wholesale/export.ts:50,184 и test/wholesale.test.ts:454,556-574 · PDF без сжатия потоков и zip «store» выбраны ради читаемости тестами; тесты привязаны к способу упаковки и имени шрифта, а не только к декодированному тексту. Excel в самом Excel не открывался, проверен только распаковкой XML.",
+    "Таск 07 · apps/admin/src/wholesale/index.tsx:37 · useEffect перезагружает список по флагу busy — двойной запрос на каждое решение.",
+    "Таск 07 · срок ответа менеджера — константа-заглушка RESPONSE_TERM_PLACEHOLDER, не переменная окружения; TTL ссылки 180 дней — техническое умолчание, переопределяется WHOLESALE_ACCESS_TTL_DAYS. Письма оптовику сервер не шлёт: менеджер копирует ссылку из управленки."
   ],
   "reviewers": {
     "manifestSpec": null,
