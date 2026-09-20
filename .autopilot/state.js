@@ -11,7 +11,7 @@ window.STATE =
   "memoryFile": "AGENTS.md",
   "skillDir": "C:/Users/Denn/claude_projects/website_visteria/.agents/skills/autopilot",
   "startedAt": "2026-09-09T19:30:00+03:00",
-  "updatedAt": "2026-09-20T19:10:40+03:00",
+  "updatedAt": "2026-09-20T19:17:12+03:00",
   "finishedAt": null,
   "stages": [
     {
@@ -484,7 +484,7 @@ window.STATE =
     "Таск 10 · apps/web/src/app/cart/page.tsx, checkout/page.tsx, checkout/done/page.tsx · есть title, нет description; страницы noindex.",
     "Таск 10 · interfaces/00-core.md выставляет /legal, а голый /legal отдаёт 404: есть только /legal/oferta и /legal/privacy.",
     "Локальная среда · apps/web/.next/types/app/opt/* · устаревшие сгенерированные типы удалённого маршрута /opt валят pnpm --filter @visteria/web typecheck; лечится очисткой .next, к коду не относится.",
-    "Таск 07 · apps/web/src/components/site/site-header.tsx · ссылки на /opt в навигации витрины нет, раздел доступен только по адресу; шапка — зона дизайн-трека главной, решение за пользователем.",
+    "Таск 07 · site-header.tsx · находка ревью «ссылки на /opt в навигации нет» оказалась ошибочной: пункт «Опт» → /opt стоит в общем массиве nav (apps/web/src/lib/content.ts:132) и попадает в шапку и мобильное меню; закреплено тестом header.test.ts, коммит da25db2 (20.09.2026). Снято.",
     "Таск 07 · packages/db/src/wholesale.ts:13 · константа PRICE копирует проекцию PUBLIC_FIELDS из catalog.ts целиком плюс одна колонка; новое публичное поле разойдётся между каталогом и прайсом.",
     "Таск 07 · apps/api/src/wholesale/controller.ts:108 · поле exports в JSON отдаёт пути API с сырым токеном, которые витрина не читает (строит свои /opt/price/…): либо витрина потребляет exports, либо поля нет.",
     "Таск 07 · apps/api/src/wholesale/controller.ts:16,156 · WholesaleTransaction дублирует CheckoutTransaction по форме; actor() — посредник в одну строку до runtime.staffAuth.",
